@@ -21,15 +21,12 @@ const Login = () => {
     setLoading(true);
 
     try {
-      
-      const res = await api.post('/api/login', { email, password });
-      
+      const res = await api.post('/api/usuarios/login', { email, password });
       
       const usuarioData = res.data.usuario;
       localStorage.setItem('usuario_aneupi', JSON.stringify(usuarioData));
       
       toast.success(`Bienvenido, ${usuarioData.nombre}`);
-      
       
       navigate('/dashboard');
 

@@ -86,5 +86,30 @@ export const solicitudController = {
       const status = error.message.includes('no existe') ? 404 : 500;
       res.status(status).json({ error: error.message });
     }
+  },
+
+  
+  async delete(req, res) {
+    const { id } = req.params;
+    const solicitudId = parseInt(id);
+
+    if (isNaN(solicitudId)) {
+      return res.status(400).json({ error: 'ID inválido' });
+    }
+
+    try {
+      
+      if (solicitudService.delete) {
+        await solicitudService.delete(solicitudId);
+        res.json({ message: 'Solicitud eliminada correctamente' });
+      } else {
+      
+        console.warn("Falta implementar delete en solicitud.service.js");
+        res.status(501).json({ error: 'Función de eliminar no implementada en el servicio' });
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error al eliminar la solicitud' });
+    }
   }
 };
