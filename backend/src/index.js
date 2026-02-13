@@ -6,16 +6,13 @@ const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3000;
 
-// Middlewares
 app.use(cors()); 
 app.use(express.json());
 
-// Ruta de prueba
 app.get('/', (req, res) => {
   res.send('API Portal de Servicios Digitales ANEUPI - Funcionando ');
 });
 
-// 1. Obtener todos los documentos disponibles (Catálogo)
 app.get('/api/documentos', async (req, res) => {
   try {
     const docs = await prisma.tipoDocumento.findMany({
@@ -28,12 +25,10 @@ app.get('/api/documentos', async (req, res) => {
   }
 });
 
-// 2. CREAR UNA NUEVA SOLICITUD (Botón "Solicitar")
 app.post('/api/solicitudes', async (req, res) => {
   const { usuarioId, tipoDocumentoId } = req.body;
 
   try {
-    // A. Buscamos el documento para saber cuánto cuesta HOY
     const doc = await prisma.tipoDocumento.findUnique({
       where: { id: parseInt(tipoDocumentoId) }
     });
@@ -42,7 +37,6 @@ app.post('/api/solicitudes', async (req, res) => {
       return res.status(404).json({ error: "El documento seleccionado no existe" });
     }
 
-    // B. Creamos la solicitud en la base de datos
     const nuevaSolicitud = await prisma.solicitud.create({
       data: {
         usuarioId: parseInt(usuarioId),        
@@ -60,7 +54,6 @@ app.post('/api/solicitudes', async (req, res) => {
   }
 });
 
-// 3. OBTENER HISTORIAL DE SOLICITUDES 
 app.get('/api/solicitudes/usuario/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -75,6 +68,19 @@ app.get('/api/solicitudes/usuario/:id', async (req, res) => {
   } catch (error) {
     console.error("Error obteniendo historial:", error);
     res.status(500).json({ error: "Error al cargar el historial" });
+  }
+});
+
+app.delete('/api/solicitudes/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await prisma.solicitud.delete({
+      where: { id: parseInt(id) }
+    });
+    res.json({ message: "Solicitud eliminada correctamente" });
+  } catch (error) {
+    console.error("Error al eliminar:", error);
+    res.status(500).json({ error: "No se pudo eliminar la solicitud" });
   }
 });
 
