@@ -78,6 +78,8 @@ model Solicitud {
 
   // Archivos
   comprobantePagoUrl String? // La foto que sube el usuario
+  nombreArchivo      String? // Nombre del archivo subido
+  extensionArchivo   String? // Extensión del archivo
   pdfGeneradoUrl     String? // El PDF final que genera el sistema
   observacionAdmin   String? // Si se rechaza, por qué
 

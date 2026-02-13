@@ -47,5 +47,23 @@ export const solicitudService = {
         fechaAprobacion: estado === 'APROBADO' ? new Date() : null
       }
     });
+  },
+
+  async uploadComprobante(solicitudId, imagenBase64, nombreArchivo, extensionArchivo) {
+    const solicitud = await prisma.solicitud.findUnique({ 
+      where: { id: solicitudId } 
+    });
+    
+    if (!solicitud) throw new Error('La solicitud no existe');
+
+    return prisma.solicitud.update({
+      where: { id: solicitudId },
+      data: {
+        comprobantePagoUrl: imagenBase64,
+        nombreArchivo,
+        extensionArchivo,
+        estado: 'EN_REVISION'
+      }
+    });
   }
 };
