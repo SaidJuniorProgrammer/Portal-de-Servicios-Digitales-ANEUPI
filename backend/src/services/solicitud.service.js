@@ -2,6 +2,12 @@ import { prisma } from '../infrastructure/database/prisma.js';
 
 export const solicitudService = {
   async create(usuarioId, tipoDocumentoId) {
+    const usuario = await prisma.usuario.findUnique({ 
+      where: { id: usuarioId } 
+    });
+    
+    if (!usuario) throw new Error('El usuario no existe');
+
     const documento = await prisma.tipoDocumento.findUnique({ 
       where: { id: tipoDocumentoId } 
     });

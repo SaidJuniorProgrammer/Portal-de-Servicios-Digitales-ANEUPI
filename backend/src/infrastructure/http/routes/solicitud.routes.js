@@ -26,6 +26,39 @@ export const solicitudRoutes = Router();
  *     responses:
  *       200:
  *         description: Solicitud creada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 usuarioId:
+ *                   type: integer
+ *                 tipoDocumentoId:
+ *                   type: integer
+ *                 estado:
+ *                   type: string
+ *                   enum: [PENDIENTE_PAGO, EN_REVISION, APROBADO, RECHAZADO]
+ *                 precioAlSolicitar:
+ *                   type: number
+ *                   format: decimal
+ *                 fechaSolicitud:
+ *                   type: string
+ *                   format: date-time
+ *                 fechaAprobacion:
+ *                   type: string
+ *                   format: date-time
+ *                   nullable: true
+ *                 comprobantePagoUrl:
+ *                   type: string
+ *                   nullable: true
+ *                 pdfGeneradoUrl:
+ *                   type: string
+ *                   nullable: true
+ *                 observacionAdmin:
+ *                   type: string
+ *                   nullable: true
  *       404:
  *         description: Documento no encontrado
  */
@@ -47,5 +80,56 @@ solicitudRoutes.post('/', solicitudController.create);
  *     responses:
  *       200:
  *         description: Lista de solicitudes del usuario
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   usuarioId:
+ *                     type: integer
+ *                   tipoDocumentoId:
+ *                     type: integer
+ *                   estado:
+ *                     type: string
+ *                     enum: [PENDIENTE_PAGO, EN_REVISION, APROBADO, RECHAZADO]
+ *                   precioAlSolicitar:
+ *                     type: number
+ *                     format: decimal
+ *                   fechaSolicitud:
+ *                     type: string
+ *                     format: date-time
+ *                   fechaAprobacion:
+ *                     type: string
+ *                     format: date-time
+ *                     nullable: true
+ *                   comprobantePagoUrl:
+ *                     type: string
+ *                     nullable: true
+ *                   pdfGeneradoUrl:
+ *                     type: string
+ *                     nullable: true
+ *                   observacionAdmin:
+ *                     type: string
+ *                     nullable: true
+ *                   tipoDocumento:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       nombre:
+ *                         type: string
+ *                       descripcion:
+ *                         type: string
+ *                       precio:
+ *                         type: number
+ *                         format: decimal
+ *                       activo:
+ *                         type: boolean
+ *                       codigoPlantilla:
+ *                         type: string
  */
 solicitudRoutes.get('/usuario/:id', solicitudController.getByUsuario);

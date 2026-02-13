@@ -6,8 +6,8 @@ export const documentoController = {
       const documentos = await documentoService.getAll();
       res.json(documentos);
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Error al obtener los documentos' });
+      console.error('Error al obtener documentos:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
   }
 };

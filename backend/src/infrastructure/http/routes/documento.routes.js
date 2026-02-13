@@ -26,7 +26,8 @@ export const documentoRoutes = Router();
  *                   descripcion:
  *                     type: string
  *                   precio:
- *                     type: string
+ *                     type: number
+*                     format: decimal
  *                   activo:
  *                     type: boolean
  *                   codigoPlantilla:
