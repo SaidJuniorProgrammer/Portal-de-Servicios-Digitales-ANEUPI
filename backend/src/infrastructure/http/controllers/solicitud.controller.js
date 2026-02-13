@@ -40,5 +40,28 @@ export const solicitudController = {
       console.error(error);
       res.status(500).json({ error: 'Error al cargar el historial' });
     }
+  },
+
+  async updateEstado(req, res) {
+    const { id } = req.params;
+    const { estado, observacionAdmin } = req.body;
+    const solicitudId = parseInt(id);
+
+    if (isNaN(solicitudId)) {
+      return res.status(400).json({ error: 'ID de solicitud debe ser un número válido' });
+    }
+
+    if (!estado || !['APROBADO', 'RECHAZADO'].includes(estado)) {
+      return res.status(400).json({ error: 'Estado debe ser APROBADO o RECHAZADO' });
+    }
+
+    try {
+      const solicitud = await solicitudService.updateEstado(solicitudId, estado, observacionAdmin);
+      res.json(solicitud);
+    } catch (error) {
+      console.error(error);
+      const status = error.message.includes('no existe') ? 404 : 500;
+      res.status(status).json({ error: error.message });
+    }
   }
 };

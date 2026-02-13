@@ -133,3 +133,41 @@ solicitudRoutes.post('/', solicitudController.create);
  *                         type: string
  */
 solicitudRoutes.get('/usuario/:id', solicitudController.getByUsuario);
+
+/**
+ * @swagger
+ * /api/solicitudes/{id}/estado:
+ *   put:
+ *     summary: Actualizar estado de una solicitud (Admin)
+ *     tags: [Solicitudes]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la solicitud
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - estado
+ *             properties:
+ *               estado:
+ *                 type: string
+ *                 enum: [APROBADO, RECHAZADO]
+ *               observacionAdmin:
+ *                 type: string
+ *                 description: Observación del administrador (requerida si es RECHAZADO)
+ *     responses:
+ *       200:
+ *         description: Estado actualizado exitosamente
+ *       400:
+ *         description: Datos inválidos
+ *       404:
+ *         description: Solicitud no encontrada
+ */
+solicitudRoutes.put('/:id/estado', solicitudController.updateEstado);

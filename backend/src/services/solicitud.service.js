@@ -30,5 +30,22 @@ export const solicitudService = {
       include: { tipoDocumento: true },
       orderBy: { fechaSolicitud: 'desc' }
     });
+  },
+
+  async updateEstado(solicitudId, estado, observacionAdmin) {
+    const solicitud = await prisma.solicitud.findUnique({ 
+      where: { id: solicitudId } 
+    });
+    
+    if (!solicitud) throw new Error('La solicitud no existe');
+
+    return prisma.solicitud.update({
+      where: { id: solicitudId },
+      data: {
+        estado,
+        observacionAdmin,
+        fechaAprobacion: estado === 'APROBADO' ? new Date() : null
+      }
+    });
   }
 };
