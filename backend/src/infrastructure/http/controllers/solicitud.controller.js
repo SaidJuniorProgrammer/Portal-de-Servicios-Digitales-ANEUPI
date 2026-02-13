@@ -63,5 +63,28 @@ export const solicitudController = {
       const status = error.message.includes('no existe') ? 404 : 500;
       res.status(status).json({ error: error.message });
     }
+  },
+
+  async uploadComprobante(req, res) {
+    const { id } = req.params;
+    const { imagenBase64, nombreArchivo, extensionArchivo } = req.body;
+    const solicitudId = parseInt(id);
+
+    if (isNaN(solicitudId)) {
+      return res.status(400).json({ error: 'ID de solicitud debe ser un número válido' });
+    }
+
+    if (!imagenBase64 || !nombreArchivo || !extensionArchivo) {
+      return res.status(400).json({ error: 'imagenBase64, nombreArchivo y extensionArchivo son requeridos' });
+    }
+
+    try {
+      const solicitud = await solicitudService.uploadComprobante(solicitudId, imagenBase64, nombreArchivo, extensionArchivo);
+      res.json(solicitud);
+    } catch (error) {
+      console.error(error);
+      const status = error.message.includes('no existe') ? 404 : 500;
+      res.status(status).json({ error: error.message });
+    }
   }
 };

@@ -161,7 +161,7 @@ solicitudRoutes.get('/usuario/:id', solicitudController.getByUsuario);
  *                 enum: [APROBADO, RECHAZADO]
  *               observacionAdmin:
  *                 type: string
- *                 description: Observación del administrador (requerida si es RECHAZADO)
+ *                 description: Observacion del administrador
  *     responses:
  *       200:
  *         description: Estado actualizado exitosamente
@@ -171,3 +171,44 @@ solicitudRoutes.get('/usuario/:id', solicitudController.getByUsuario);
  *         description: Solicitud no encontrada
  */
 solicitudRoutes.put('/:id/estado', solicitudController.updateEstado);
+
+/**
+ * @swagger
+ * /api/solicitudes/{id}/comprobante:
+ *   put:
+ *     summary: Subir comprobante de pago
+ *     tags: [Solicitudes]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la solicitud
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - imagenBase64
+ *             properties:
+ *               imagenBase64:
+ *                 type: string
+ *                 description: Imagen del comprobante en formato base64
+ *               nombreArchivo:
+ *                 type: string
+ *                 description: Nombre del archivo subido
+ *               extensionArchivo:
+ *                 type: string
+ *                 description: Extension del archivo
+ *     responses:
+ *       200:
+ *         description: Comprobante subido exitosamente
+ *       400:
+ *         description: Datos inválidos
+ *       404:
+ *         description: Solicitud no encontrada
+ */
+solicitudRoutes.put('/:id/comprobante', solicitudController.uploadComprobante);
