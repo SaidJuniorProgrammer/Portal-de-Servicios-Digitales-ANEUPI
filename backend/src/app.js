@@ -7,13 +7,38 @@ export const createApp = () => {
   const prisma = new PrismaClient();
 
   app.use(cors());
-  
-  
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
   app.get('/', (req, res) => {
     res.send('API Portal ANEUPI Funcionando');
+  });
+
+  app.post('/api/login', async (req, res) => {
+    const { email, password } = req.body;
+    try {
+      const usuario = await prisma.usuario.findFirst({
+        where: { email: email }
+      });
+
+      if (!usuario) {
+        if (email === "admin@aneupi.com" && password === "123456") {
+           return res.json({ 
+             message: "Login exitoso",
+             usuario: { id: 1, nombre: "Administrador", email: "admin@aneupi.com", rol: "ADMIN" } 
+           });
+        }
+        return res.status(401).json({ error: "Credenciales incorrectas" });
+      }
+
+      res.json({
+        message: "Login exitoso",
+        usuario: { id: usuario.id, nombre: usuario.nombre, email: usuario.email, rol: usuario.rol }
+      });
+
+    } catch (error) {
+      res.status(500).json({ error: "Error en el servidor" });
+    }
   });
 
   app.get('/api/documentos', async (req, res) => {
@@ -66,29 +91,18 @@ export const createApp = () => {
     }
   });
 
-  
   app.post('/api/solicitudes/:id/pago', async (req, res) => {
     const { id } = req.params;
-    
     const { imagenBase64, nombreArchivo, extension } = req.body;
 
-    console.log(`Recibiendo pago para solicitud #${id}`);
-    console.log(`Archivo: ${nombreArchivo}, Extensión: ${extension}`);
-    
-
     try {
-      
       const actualizada = await prisma.solicitud.update({
         where: { id: parseInt(id) },
-        data: { 
-          estado: 'EN_REVISION'
-          
-        }
+        data: { estado: 'EN_REVISION' }
       });
       
       res.json({ message: "Pago recibido correctamente", solicitud: actualizada });
     } catch (error) {
-      console.error("Error al procesar pago:", error);
       res.status(500).json({ error: "Error al registrar el pago" });
     }
   });

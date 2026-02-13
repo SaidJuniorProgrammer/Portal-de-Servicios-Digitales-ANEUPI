@@ -1,111 +1,110 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { FaEnvelope, FaLock, FaSignInAlt } from 'react-icons/fa';
-// import api from '../services/api';
+import { FaUser, FaLock, FaSignInAlt } from 'react-icons/fa';
+import api from '../services/api';
 
 const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     
-    
-    if (!formData.email || !formData.password) {
-      return toast.error("Por favor completa todos los campos");
+    if (!email || !password) {
+      toast.error("Por favor completa todos los campos");
+      return;
     }
+
+    setLoading(true);
 
     try {
       
-      toast.loading("Iniciando sesión...");
-      
-      await new Promise(resolve => setTimeout(resolve, 1500)); 
-      
-      toast.dismiss(); 
-      toast.success(`Bienvenido de nuevo, ${formData.email}`);
+      const res = await api.post('/api/login', { email, password });
       
       
-      localStorage.setItem('usuario_aneupi', JSON.stringify({ email: formData.email, id: 1 }));
+      const usuarioData = res.data.usuario;
+      localStorage.setItem('usuario_aneupi', JSON.stringify(usuarioData));
+      
+      toast.success(`Bienvenido, ${usuarioData.nombre}`);
       
       
       navigate('/dashboard');
 
     } catch (error) {
-      toast.error("Credenciales incorrectas");
+      console.error(error);
+      toast.error("Correo o contraseña incorrectos");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
         
-        {/* Encabezado Azul */}
-        <div className="bg-aneupi-primary p-8 text-center">
-          <h1 className="text-3xl font-serif font-bold text-white mb-2">Portal ANEUPI</h1>
-          <p className="text-aneupi-accent text-sm">Sistema de Gestión de Servicios</p>
+        <div className="text-center mb-8">
+          <div className="bg-aneupi-primary w-full h-24 rounded-xl flex items-center justify-center mb-6 shadow-lg shadow-aneupi-primary/30">
+             <h1 className="text-3xl font-serif font-bold text-white tracking-widest">ANEUPI</h1>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800">Iniciar Sesión</h2>
+          <p className="text-gray-500 text-sm mt-1">Sistema de Gestión de Servicios</p>
         </div>
 
-        {/* Formulario */}
-        <form onSubmit={handleSubmit} className="p-8 pt-10">
-          <h2 className="text-xl font-bold text-gray-800 mb-6 text-center">Iniciar Sesión</h2>
+        <form onSubmit={handleLogin} className="space-y-6">
           
-          <div className="space-y-5">
-            {/* Campo Email */}
+          <div className="space-y-2">
+            <label className="text-sm font-bold text-gray-700 ml-1">Correo Electrónico</label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FaEnvelope className="text-gray-400" />
-              </div>
-              <input
-                type="email"
-                name="email"
-                placeholder="Correo Electrónico"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-aneupi-secondary focus:ring-2 focus:ring-aneupi-accent outline-none transition-all"
-              />
-            </div>
-
-            {/* Campo Contraseña */}
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FaLock className="text-gray-400" />
-              </div>
-              <input
-                type="password"
-                name="password"
-                placeholder="Contraseña"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-aneupi-secondary focus:ring-2 focus:ring-aneupi-accent outline-none transition-all"
+              <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input 
+                type="email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="ejemplo@aneupi.com"
+                className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 focus:border-aneupi-primary focus:ring-4 focus:ring-aneupi-primary/10 transition-all outline-none bg-gray-50 focus:bg-white"
               />
             </div>
           </div>
 
-          <button
-            type="submit"
-            className="w-full mt-8 bg-aneupi-primary text-white py-3 rounded-lg font-bold hover:bg-aneupi-secondary transition-colors flex items-center justify-center gap-2 shadow-lg shadow-aneupi-primary/30"
+          <div className="space-y-2">
+            <label className="text-sm font-bold text-gray-700 ml-1">Contraseña</label>
+            <div className="relative">
+              <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input 
+                type="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 focus:border-aneupi-primary focus:ring-4 focus:ring-aneupi-primary/10 transition-all outline-none bg-gray-50 focus:bg-white"
+              />
+            </div>
+          </div>
+
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="w-full bg-aneupi-primary text-white font-bold py-4 rounded-xl shadow-lg shadow-aneupi-primary/30 hover:bg-aneupi-secondary transform active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            <FaSignInAlt /> Ingresar
+            {loading ? (
+              <span className="animate-pulse">Ingresando...</span>
+            ) : (
+              <>
+                <FaSignInAlt /> Ingresar
+              </>
+            )}
           </button>
 
-          <div className="mt-6 text-center text-sm text-gray-500">
-            ¿No tienes cuenta?{' '}
-            <Link to="/registro" className="text-aneupi-secondary font-bold hover:underline">
-              Regístrate aquí
-            </Link>
-          </div>
         </form>
+
+        <div className="mt-8 text-center">
+           <a href="#" className="text-sm text-aneupi-secondary font-bold hover:underline">
+             ¿Olvidaste tu contraseña?
+           </a>
+        </div>
+
       </div>
     </div>
   );
