@@ -8,7 +8,6 @@ const ModalSubirPago = ({ solicitud, onClose, onSuccess }) => {
   const [preview, setPreview] = useState(null);
   const [subiendo, setSubiendo] = useState(false);
 
-  
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -17,17 +16,12 @@ const ModalSubirPago = ({ solicitud, onClose, onSuccess }) => {
     }
   };
 
-  
   const convertirABase64 = (file) => {
     return new Promise((resolve, reject) => {
       const fileReader = new FileReader();
-      fileReader.readAsDataURL(file); 
-      fileReader.onload = () => {
-        resolve(fileReader.result);
-      };
-      fileReader.onerror = (error) => {
-        reject(error);
-      };
+      fileReader.readAsDataURL(file);
+      fileReader.onload = () => resolve(fileReader.result);
+      fileReader.onerror = (error) => reject(error);
     });
   };
 
@@ -38,26 +32,23 @@ const ModalSubirPago = ({ solicitud, onClose, onSuccess }) => {
     setSubiendo(true);
 
     try {
-      
       const base64String = await convertirABase64(archivo);
 
       
       const payload = {
         nombreArchivo: archivo.name,
-        extension: archivo.name.split('.').pop(), 
+        extensionArchivo: archivo.name.split('.').pop(), 
         imagenBase64: base64String
       };
 
-      
       await api.post(`/api/solicitudes/${solicitud.id}/pago`, payload);
       
       toast.success("Comprobante enviado correctamente");
-      onSuccess(); 
-      onClose();   
-
+      onSuccess();
+      onClose();
     } catch (error) {
       console.error(error);
-      toast.error("Error al subir el comprobante");
+      toast.error(error.response?.data?.error || "Error al subir el comprobante");
     } finally {
       setSubiendo(false);
     }
@@ -65,62 +56,72 @@ const ModalSubirPago = ({ solicitud, onClose, onSuccess }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100">
         
-        {/* Encabezado */}
-        <div className="bg-aneupi-primary p-4 flex justify-between items-center text-white">
+        
+        <div className="bg-aneupi-primary p-4 flex justify-between items-center text-white shadow-md">
           <h3 className="font-bold text-lg flex items-center gap-2">
             <FaMoneyBillWave /> Reportar Pago
           </h3>
-          <button onClick={onClose} className="hover:bg-white/20 p-1 rounded-full transition-colors">
+          <button 
+            onClick={onClose} 
+            className="hover:bg-white/20 p-2 rounded-full transition-colors cursor-pointer"
+          >
             <FaTimes />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6">
-          <div className="mb-4 text-center">
-            <p className="text-gray-600 text-sm mb-1">Solicitud para:</p>
-            <p className="font-bold text-gray-800 text-lg">{solicitud.tipoDocumento.nombre}</p>
-            <p className="text-aneupi-secondary font-bold text-xl mt-2">${Number(solicitud.precioAlSolicitar).toFixed(2)}</p>
+          <div className="mb-6 text-center bg-gray-50 p-4 rounded-xl border border-gray-100">
+            <p className="text-gray-500 text-xs uppercase tracking-wide font-bold mb-1">Solicitud para:</p>
+            <p className="font-bold text-gray-800 text-lg leading-tight mb-2">{solicitud.tipoDocumento.nombre}</p>
+            <div className="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-bold">
+               Valor a pagar: ${Number(solicitud.precioAlSolicitar).toFixed(2)}
+            </div>
           </div>
 
-          
-          <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center justify-center bg-gray-50 hover:bg-blue-50 transition-colors relative">
+          <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center justify-center bg-gray-50 hover:bg-blue-50 transition-colors relative min-h-[180px] group cursor-pointer">
             
-            {preview ? (
-              <div className="relative w-full text-center">
-                <img src={preview} alt="Comprobante" className="max-h-48 mx-auto object-contain rounded-md shadow-sm" />
-                <button 
-                  type="button" 
-                  onClick={() => { setArchivo(null); setPreview(null); }}
-                  className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full shadow-md hover:bg-red-600 transform translate-x-2 -translate-y-2"
-                >
-                  <FaTimes size={12} />
-                </button>
-                <p className="text-xs text-gray-500 mt-2">{archivo.name}</p>
-              </div>
-            ) : (
-              <>
-                <FaCloudUploadAlt className="text-4xl text-gray-400 mb-2" />
-                <p className="text-sm text-gray-500 font-medium">Click para seleccionar comprobante</p>
-                <p className="text-xs text-gray-400 mt-1">JPG, PNG o PDF</p>
-              </>
-            )}
-
             <input 
               type="file" 
               accept="image/*,.pdf"
               onChange={handleFileChange}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              className="absolute inset-0 w-full h-full opacity-0 z-10 cursor-pointer"
             />
+
+            {preview ? (
+              <div className="relative w-full text-center">
+                <img src={preview} alt="Comprobante" className="max-h-40 mx-auto object-contain rounded-md shadow-sm" />
+                <p className="text-xs text-gray-500 mt-2 truncate max-w-[200px] mx-auto">{archivo.name}</p>
+                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-md">
+                   <p className="text-white text-sm font-bold">Cambiar imagen</p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="bg-white p-4 rounded-full shadow-sm mb-3 group-hover:scale-110 transition-transform">
+                   <FaCloudUploadAlt className="text-4xl text-aneupi-primary" />
+                </div>
+                <p className="text-sm text-gray-600 font-medium">Sube tu comprobante aquí</p>
+                <p className="text-xs text-gray-400 mt-1">Formatos: JPG, PNG</p>
+              </>
+            )}
           </div>
 
           <button 
             type="submit" 
             disabled={subiendo || !archivo}
-            className="w-full mt-6 bg-aneupi-secondary text-white py-3 rounded-xl font-bold hover:bg-aneupi-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
+            className="w-full mt-6 bg-aneupi-secondary text-white py-3.5 rounded-xl font-bold hover:bg-aneupi-primary active:scale-95 transition-all shadow-lg shadow-aneupi-primary/20 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2 cursor-pointer"
           >
-            {subiendo ? 'Procesando...' : 'Enviar Comprobante'}
+            {subiendo ? (
+              <>
+                 <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                 </svg>
+                 Subiendo...
+              </>
+            ) : 'Confirmar Envío'}
           </button>
         </form>
       </div>

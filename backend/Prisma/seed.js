@@ -1,11 +1,11 @@
 import { PrismaClient } from '@prisma/client';
+import sha256 from 'sha256';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log(' Iniciando siembra de datos...');
+  console.log('Iniciando siembra de datos...');
 
-  // 1. Crear Tipos de Documentos 
   const documentos = [
     {
       nombre: 'Formato de solicitud de balances',
@@ -70,25 +70,45 @@ async function main() {
   ];
 
   for (const doc of documentos) {
-    await prisma.tipoDocumento.create({
-      data: doc,
+    const existe = await prisma.tipoDocumento.findFirst({
+        where: { codigoPlantilla: doc.codigoPlantilla }
     });
+
+    if (!existe) {
+        await prisma.tipoDocumento.create({
+            data: doc
+        });
+        console.log(`+ Creado: ${doc.nombre}`);
+    }
   }
 
-  console.log(' Tipos de documentos creados.');
+  const emailAdmin = 'admin@aneupi.com';
+  const hashedPassword = sha256('admin123');
   
-  // 2. Crear un Usuario Admin de prueba
-  await prisma.usuario.create({
-    data: {
-      email: 'admin@aneupi.com',
-      password: 'admin123', 
-      rol: 'ADMIN',
-      nombreCompleto: 'Administrador Principal',
-      cedula: '0999999999'
-    }
+  const adminExiste = await prisma.usuario.findUnique({
+      where: { email: emailAdmin }
   });
 
-  console.log('✅ Usuario Admin creado (admin@aneupi.com).');
+  if (adminExiste) {
+      await prisma.usuario.update({
+          where: { email: emailAdmin },
+          data: { password: hashedPassword }
+      });
+      console.log('Contraseña de Admin actualizada.');
+  } else {
+      await prisma.usuario.create({
+        data: {
+          email: emailAdmin,
+          password: hashedPassword,
+          rol: 'ADMIN',
+          nombreCompleto: 'Administrador Principal',
+          cedula: '0999999999',
+          direccion: 'Oficina Central',
+          telefono: '0999999999'
+        }
+      });
+      console.log('Usuario Admin creado.');
+  }
 }
 
 main()

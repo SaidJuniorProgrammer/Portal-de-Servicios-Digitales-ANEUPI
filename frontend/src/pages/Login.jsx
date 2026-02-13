@@ -21,25 +21,51 @@ const Login = () => {
     setLoading(true);
 
     try {
+      
       const res = await api.post('/api/usuarios/login', { email, password });
       
-      const usuarioData = res.data.usuario;
+      
+      const usuarioData = res.data.usuario || res.data; 
+
+      if (!usuarioData || !usuarioData.email) {
+          throw new Error("Respuesta del servidor inválida");
+      }
+
+      
       localStorage.setItem('usuario_aneupi', JSON.stringify(usuarioData));
       
-      toast.success(`Bienvenido, ${usuarioData.nombre}`);
       
-      navigate('/dashboard');
+      const nombreMostrar = usuarioData.nombre || usuarioData.nombreCompleto || "Usuario";
+      toast.success(`Bienvenido, ${nombreMostrar}`);
+      
+      
+      navigate('/dashboard', { replace: true });
 
     } catch (error) {
-      console.error(error);
-      toast.error("Correo o contraseña incorrectos");
+      console.error("Error en Login:", error);
+      
+      
+      if (error.response) {
+          
+          if (error.response.status === 401) {
+              toast.error("Contraseña incorrecta o usuario no encontrado");
+          } else {
+              toast.error(error.response.data.error || "Error al iniciar sesión");
+          }
+      } else if (error.request) {
+          
+          toast.error("No se pudo conectar con el servidor. Revisa tu conexión.");
+      } else {
+          
+          toast.error("Ocurrió un error inesperado.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4 font-sans">
       <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
         
         <div className="text-center mb-8">
@@ -83,7 +109,7 @@ const Login = () => {
           <button 
             type="submit" 
             disabled={loading}
-            className="w-full bg-aneupi-primary text-white font-bold py-4 rounded-xl shadow-lg shadow-aneupi-primary/30 hover:bg-aneupi-secondary transform active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="w-full bg-aneupi-primary text-white font-bold py-4 rounded-xl shadow-lg shadow-aneupi-primary/30 hover:bg-aneupi-secondary transform active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
           >
             {loading ? (
               <span className="animate-pulse">Ingresando...</span>

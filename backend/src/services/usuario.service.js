@@ -71,32 +71,42 @@ class UsuarioService {
     });
   }
 
-
   async login(email, password) {
-  const hashedPassword = sha256(password);
+    console.log(` Intento de login para: ${email}`);
+    
+    
+    const hashedPassword = sha256(password);
 
-  const usuario = await prisma.usuario.findUnique({
-    where: { email }
-  });
+    
+    const usuario = await prisma.usuario.findUnique({
+      where: { email }
+    });
 
-  if (!usuario) {
-    throw new Error('Usuario no encontrado');
+    if (!usuario) {
+      console.log(" Usuario no encontrado en BD");
+      throw new Error('Usuario no encontrado');
+    }
+
+   
+    console.log(`   Hash BaseDatos: ${usuario.password.substring(0, 10)}...`);
+    console.log(`   Hash Recibido:  ${hashedPassword.substring(0, 10)}...`);
+
+    if (usuario.password !== hashedPassword) {
+      console.log(" Contraseña incorrecta");
+      throw new Error('Credenciales incorrectas');
+    }
+
+    console.log(" Login exitoso");
+
+    return {
+      id: usuario.id,
+      email: usuario.email,
+      rol: usuario.rol,
+      nombreCompleto: usuario.nombreCompleto,
+      nombre: usuario.nombreCompleto, 
+      token: "demo-token-123" 
+    };
   }
-
-  if (usuario.password !== hashedPassword) {
-    throw new Error('Credenciales incorrectas');
-  }
-
-  return {
-    id: usuario.id,
-    email: usuario.email,
-    rol: usuario.rol,
-    nombreCompleto: usuario.nombreCompleto
-  };
-}
-
-
-
 }
 
 export const usuarioService = new UsuarioService();
