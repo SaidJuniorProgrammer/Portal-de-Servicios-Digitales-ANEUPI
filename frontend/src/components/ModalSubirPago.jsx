@@ -8,6 +8,7 @@ const ModalSubirPago = ({ solicitud, onClose, onSuccess }) => {
   const [preview, setPreview] = useState(null);
   const [subiendo, setSubiendo] = useState(false);
 
+  
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -16,23 +17,44 @@ const ModalSubirPago = ({ solicitud, onClose, onSuccess }) => {
     }
   };
 
+  
+  const convertirABase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const fileReader = new FileReader();
+      fileReader.readAsDataURL(file); 
+      fileReader.onload = () => {
+        resolve(fileReader.result);
+      };
+      fileReader.onerror = (error) => {
+        reject(error);
+      };
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!archivo) return toast.error("Por favor selecciona una imagen");
 
     setSubiendo(true);
-    
-    
-    const formData = new FormData();
-    formData.append('comprobante', archivo);
 
     try {
-  
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      const base64String = await convertirABase64(archivo);
 
-      toast.success("Comprobante subido correctamente");
+      
+      const payload = {
+        nombreArchivo: archivo.name,
+        extension: archivo.name.split('.').pop(), 
+        imagenBase64: base64String
+      };
+
+      
+      await api.post(`/api/solicitudes/${solicitud.id}/pago`, payload);
+      
+      toast.success("Comprobante enviado correctamente");
       onSuccess(); 
       onClose();   
+
     } catch (error) {
       console.error(error);
       toast.error("Error al subir el comprobante");
@@ -42,8 +64,8 @@ const ModalSubirPago = ({ solicitud, onClose, onSuccess }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
         
         {/* Encabezado */}
         <div className="bg-aneupi-primary p-4 flex justify-between items-center text-white">
@@ -62,25 +84,26 @@ const ModalSubirPago = ({ solicitud, onClose, onSuccess }) => {
             <p className="text-aneupi-secondary font-bold text-xl mt-2">${Number(solicitud.precioAlSolicitar).toFixed(2)}</p>
           </div>
 
-          {/* Área de Subida */}
+          
           <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center justify-center bg-gray-50 hover:bg-blue-50 transition-colors relative">
             
             {preview ? (
-              <div className="relative w-full">
-                <img src={preview} alt="Comprobante" className="w-full h-48 object-contain rounded-md" />
+              <div className="relative w-full text-center">
+                <img src={preview} alt="Comprobante" className="max-h-48 mx-auto object-contain rounded-md shadow-sm" />
                 <button 
                   type="button" 
                   onClick={() => { setArchivo(null); setPreview(null); }}
-                  className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full shadow-md hover:bg-red-600"
+                  className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full shadow-md hover:bg-red-600 transform translate-x-2 -translate-y-2"
                 >
                   <FaTimes size={12} />
                 </button>
+                <p className="text-xs text-gray-500 mt-2">{archivo.name}</p>
               </div>
             ) : (
               <>
                 <FaCloudUploadAlt className="text-4xl text-gray-400 mb-2" />
                 <p className="text-sm text-gray-500 font-medium">Click para seleccionar comprobante</p>
-                <p className="text-xs text-gray-400 mt-1">Formatos: JPG, PNG, PDF</p>
+                <p className="text-xs text-gray-400 mt-1">JPG, PNG o PDF</p>
               </>
             )}
 
@@ -97,7 +120,7 @@ const ModalSubirPago = ({ solicitud, onClose, onSuccess }) => {
             disabled={subiendo || !archivo}
             className="w-full mt-6 bg-aneupi-secondary text-white py-3 rounded-xl font-bold hover:bg-aneupi-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
           >
-            {subiendo ? 'Subiendo...' : 'Enviar Comprobante'}
+            {subiendo ? 'Procesando...' : 'Enviar Comprobante'}
           </button>
         </form>
       </div>

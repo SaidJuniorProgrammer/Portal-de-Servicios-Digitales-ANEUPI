@@ -7,15 +7,24 @@ export const createApp = () => {
   const prisma = new PrismaClient();
 
   app.use(cors());
-  app.use(express.json());
+  
+  
+  app.use(express.json({ limit: '50mb' }));
+  app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-
-  app.get('/api/documentos', async (req, res) => {
-    const docs = await prisma.tipoDocumento.findMany({ where: { activo: true } });
-    res.json(docs);
+  app.get('/', (req, res) => {
+    res.send('API Portal ANEUPI Funcionando');
   });
 
-  
+  app.get('/api/documentos', async (req, res) => {
+    try {
+      const docs = await prisma.tipoDocumento.findMany({ where: { activo: true } });
+      res.json(docs);
+    } catch (error) {
+      res.status(500).json({ error: "Error al obtener documentos" });
+    }
+  });
+
   app.post('/api/solicitudes', async (req, res) => {
     const { usuarioId, tipoDocumentoId } = req.body;
     try {
@@ -31,21 +40,23 @@ export const createApp = () => {
       });
       res.json(nueva);
     } catch (error) {
-      res.status(500).json({ error: "Error al crear" });
+      res.status(500).json({ error: "Error al crear solicitud" });
     }
   });
 
-  
   app.get('/api/solicitudes/usuario/:id', async (req, res) => {
-    const historial = await prisma.solicitud.findMany({
-      where: { usuarioId: parseInt(req.params.id) },
-      include: { tipoDocumento: true },
-      orderBy: { fechaSolicitud: 'desc' }
-    });
-    res.json(historial);
+    try {
+      const historial = await prisma.solicitud.findMany({
+        where: { usuarioId: parseInt(req.params.id) },
+        include: { tipoDocumento: true },
+        orderBy: { fechaSolicitud: 'desc' }
+      });
+      res.json(historial);
+    } catch (error) {
+      res.status(500).json({ error: "Error al obtener historial" });
+    }
   });
 
-  
   app.delete('/api/solicitudes/:id', async (req, res) => {
     try {
       await prisma.solicitud.delete({ where: { id: parseInt(req.params.id) } });
@@ -56,20 +67,54 @@ export const createApp = () => {
   });
 
   
+  app.post('/api/solicitudes/:id/pago', async (req, res) => {
+    const { id } = req.params;
+    
+    const { imagenBase64, nombreArchivo, extension } = req.body;
+
+    console.log(`Recibiendo pago para solicitud #${id}`);
+    console.log(`Archivo: ${nombreArchivo}, Extensión: ${extension}`);
+    
+
+    try {
+      
+      const actualizada = await prisma.solicitud.update({
+        where: { id: parseInt(id) },
+        data: { 
+          estado: 'EN_REVISION'
+          
+        }
+      });
+      
+      res.json({ message: "Pago recibido correctamente", solicitud: actualizada });
+    } catch (error) {
+      console.error("Error al procesar pago:", error);
+      res.status(500).json({ error: "Error al registrar el pago" });
+    }
+  });
+
   app.get('/api/admin/solicitudes', async (req, res) => {
-    const todas = await prisma.solicitud.findMany({
-      include: { tipoDocumento: true },
-      orderBy: { fechaSolicitud: 'desc' }
-    });
-    res.json(todas);
+    try {
+      const todas = await prisma.solicitud.findMany({
+        include: { tipoDocumento: true },
+        orderBy: { fechaSolicitud: 'desc' }
+      });
+      res.json(todas);
+    } catch (error) {
+      res.status(500).json({ error: "Error admin" });
+    }
   });
 
   app.put('/api/solicitudes/:id/estado', async (req, res) => {
-    const actualizada = await prisma.solicitud.update({
-      where: { id: parseInt(req.params.id) },
-      data: { estado: req.body.nuevoEstado }
-    });
-    res.json(actualizada);
+    try {
+      const actualizada = await prisma.solicitud.update({
+        where: { id: parseInt(req.params.id) },
+        data: { estado: req.body.nuevoEstado }
+      });
+      res.json(actualizada);
+    } catch (error) {
+      res.status(500).json({ error: "Error al cambiar estado" });
+    }
   });
 
   return app;
