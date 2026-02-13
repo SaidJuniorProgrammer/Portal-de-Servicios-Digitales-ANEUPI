@@ -4,6 +4,7 @@ import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './config/swagger.js';
 import { documentoRoutes } from './infrastructure/http/routes/documento.routes.js';
 import { solicitudRoutes } from './infrastructure/http/routes/solicitud.routes.js';
+import { usuarioRoutes } from './infrastructure/http/routes/usuario.routes.js';
 
 export const createApp = () => {
   const app = express();
@@ -18,6 +19,7 @@ export const createApp = () => {
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
   app.use('/api/documentos', documentoRoutes);
   app.use('/api/solicitudes', solicitudRoutes);
+  app.use('/api/usuarios', usuarioRoutes);
 
   return app;
 };
