@@ -25,11 +25,72 @@ export const solicitudService = {
   },
 
   async getByUsuarioId(usuarioId) {
-    return prisma.solicitud.findMany({
+    const solicitudes = await prisma.solicitud.findMany({
       where: { usuarioId },
-      include: { tipoDocumento: true },
+      include: {
+        tipoDocumento: {
+          select: { nombre: true }
+        },
+        usuario: {
+          select: { nombreCompleto: true, cedula: true }
+        }
+      },
       orderBy: { fechaSolicitud: 'desc' }
     });
+
+    return solicitudes.map(solicitud => ({
+      ...solicitud,
+      tipoDocumento: solicitud.tipoDocumento.nombre,
+      nombreCompleto: solicitud.usuario.nombreCompleto,
+      cedula: solicitud.usuario.cedula,
+      usuario: undefined
+    }));
+  },
+
+  async getAll() {
+    const solicitudes = await prisma.solicitud.findMany({
+      include: {
+        tipoDocumento: {
+          select: { nombre: true }
+        },
+        usuario: {
+          select: { nombreCompleto: true, cedula: true }
+        }
+      },
+      orderBy: { fechaSolicitud: 'desc' }
+    });
+
+    return solicitudes.map(solicitud => ({
+      ...solicitud,
+      tipoDocumento: solicitud.tipoDocumento.nombre,
+      nombreCompleto: solicitud.usuario.nombreCompleto,
+      cedula: solicitud.usuario.cedula,
+      usuario: undefined
+    }));
+  },
+
+  async getById(solicitudId) {
+    const solicitud = await prisma.solicitud.findUnique({
+      where: { id: solicitudId },
+      include: {
+        tipoDocumento: {
+          select: { nombre: true }
+        },
+        usuario: {
+          select: { nombreCompleto: true, cedula: true }
+        }
+      }
+    });
+
+    if (!solicitud) return null;
+
+    return {
+      ...solicitud,
+      tipoDocumento: solicitud.tipoDocumento.nombre,
+      nombreCompleto: solicitud.usuario.nombreCompleto,
+      cedula: solicitud.usuario.cedula,
+      usuario: undefined
+    };
   },
 
   async updateEstado(solicitudId, estado, observacionAdmin) {

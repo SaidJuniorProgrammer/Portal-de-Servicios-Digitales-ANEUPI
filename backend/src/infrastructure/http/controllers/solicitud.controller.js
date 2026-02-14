@@ -38,7 +38,37 @@ export const solicitudController = {
       res.json(solicitudes);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al cargar el historial' });
+      res.status(500).json({ error: 'Error al cargar las solicitudes' });
+    }
+  },
+
+  async getAll(req, res) {
+    try {
+      const solicitudes = await solicitudService.getAll();
+      res.json(solicitudes);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error al cargar las solicitudes' });
+    }
+  },
+
+  async getById(req, res) {
+    const { id } = req.params;
+    const solicitudId = parseInt(id);
+
+    if (isNaN(solicitudId)) {
+      return res.status(400).json({ error: 'ID de solicitud debe ser un número válido' });
+    }
+
+    try {
+      const solicitud = await solicitudService.getById(solicitudId);
+      if (!solicitud) {
+        return res.status(404).json({ error: 'Solicitud no encontrada' });
+      }
+      res.json(solicitud);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error al cargar la solicitud' });
     }
   },
 
