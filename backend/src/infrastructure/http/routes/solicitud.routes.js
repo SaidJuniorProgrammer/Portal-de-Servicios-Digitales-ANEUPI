@@ -66,9 +66,66 @@ solicitudRoutes.post('/', solicitudController.create);
 
 /**
  * @swagger
+ * /api/solicitudes:
+ *   get:
+ *     summary: Obtener todas las solicitudes
+ *     tags: [Solicitudes]
+ *     responses:
+ *       200:
+ *         description: Lista de todas las solicitudes
+ */
+solicitudRoutes.get('/', solicitudController.getAll);
+
+/**
+ * @swagger
+ * /api/solicitudes/{id}:
+ *   get:
+ *     summary: Obtener una solicitud por ID
+ *     tags: [Solicitudes]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la solicitud
+ *     responses:
+ *       200:
+ *         description: Datos de la solicitud con usuario y tipo de documento
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 estado:
+ *                   type: string
+ *                 fechaSolicitud:
+ *                   type: string
+ *                   format: date-time
+ *                 usuario:
+ *                   type: object
+ *                   properties:
+ *                     nombreCompleto:
+ *                       type: string
+ *                     cedula:
+ *                       type: string
+ *                 tipoDocumento:
+ *                   type: object
+ *                   properties:
+ *                     nombre:
+ *                       type: string
+ *       404:
+ *         description: Solicitud no encontrada
+ */
+solicitudRoutes.get('/:id', solicitudController.getById);
+
+/**
+ * @swagger
  * /api/solicitudes/usuario/{id}:
  *   get:
- *     summary: Obtener historial de solicitudes de un usuario
+ *     summary: Obtener solicitudes de un usuario específico
  *     tags: [Solicitudes]
  *     parameters:
  *       - in: path
