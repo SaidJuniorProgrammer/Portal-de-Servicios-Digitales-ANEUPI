@@ -28,12 +28,8 @@ export const solicitudService = {
     const solicitudes = await prisma.solicitud.findMany({
       where: { usuarioId },
       include: {
-        tipoDocumento: {
-          select: { nombre: true }
-        },
-        usuario: {
-          select: { nombreCompleto: true, cedula: true }
-        }
+        tipoDocumento: true,
+        usuario: true
       },
       orderBy: { fechaSolicitud: 'desc' }
     });
@@ -42,20 +38,15 @@ export const solicitudService = {
       ...solicitud,
       tipoDocumento: solicitud.tipoDocumento.nombre,
       nombreCompleto: solicitud.usuario.nombreCompleto,
-      cedula: solicitud.usuario.cedula,
-      usuario: undefined
+      cedula: solicitud.usuario.cedula
     }));
   },
 
   async getAll() {
     const solicitudes = await prisma.solicitud.findMany({
       include: {
-        tipoDocumento: {
-          select: { nombre: true }
-        },
-        usuario: {
-          select: { nombreCompleto: true, cedula: true }
-        }
+        tipoDocumento: true,
+        usuario: true
       },
       orderBy: { fechaSolicitud: 'desc' }
     });
@@ -64,8 +55,7 @@ export const solicitudService = {
       ...solicitud,
       tipoDocumento: solicitud.tipoDocumento.nombre,
       nombreCompleto: solicitud.usuario.nombreCompleto,
-      cedula: solicitud.usuario.cedula,
-      usuario: undefined
+      cedula: solicitud.usuario.cedula
     }));
   },
 
@@ -73,12 +63,8 @@ export const solicitudService = {
     const solicitud = await prisma.solicitud.findUnique({
       where: { id: solicitudId },
       include: {
-        tipoDocumento: {
-          select: { nombre: true }
-        },
-        usuario: {
-          select: { nombreCompleto: true, cedula: true }
-        }
+        tipoDocumento: true,
+        usuario: true
       }
     });
 
@@ -88,8 +74,7 @@ export const solicitudService = {
       ...solicitud,
       tipoDocumento: solicitud.tipoDocumento.nombre,
       nombreCompleto: solicitud.usuario.nombreCompleto,
-      cedula: solicitud.usuario.cedula,
-      usuario: undefined
+      cedula: solicitud.usuario.cedula
     };
   },
 
@@ -100,13 +85,25 @@ export const solicitudService = {
     
     if (!solicitud) throw new Error('La solicitud no existe');
 
+    let datosActualizar = {
+      estado,
+      observacionAdmin,
+      fechaAprobacion: estado === 'APROBADO' ? new Date() : null
+    };
+
+    if (estado === 'APROBADO' && !solicitud.codigoSolicitud) {
+      const year = new Date().getFullYear();
+      const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let hashAleatorio = '';
+      for (let i = 0; i < 4; i++) {
+        hashAleatorio += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+      }
+      datosActualizar.codigoSolicitud = `ANEUPI-${year}-${solicitudId.toString().padStart(4, '0')}-${hashAleatorio}`;
+    }
+
     return prisma.solicitud.update({
       where: { id: solicitudId },
-      data: {
-        estado,
-        observacionAdmin,
-        fechaAprobacion: estado === 'APROBADO' ? new Date() : null
-      }
+      data: datosActualizar
     });
   },
 
@@ -125,6 +122,12 @@ export const solicitudService = {
         extensionArchivo,
         estado: 'EN_REVISION'
       }
+    });
+  },
+
+  async delete(id) {
+    return prisma.solicitud.delete({
+      where: { id }
     });
   }
 };

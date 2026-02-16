@@ -6,6 +6,7 @@ import MisSolicitudes from './pages/MisSolicitudes';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminHistorial from './pages/AdminHistorial';
 
 function App() {
   return (
@@ -14,9 +15,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         
-        <Route 
-          path="/dashboard" 
-          element={
+        <Route path="/dashboard" element={
             <ProtectedRoute>
               <DashboardLayout />
             </ProtectedRoute>
@@ -26,17 +25,15 @@ function App() {
           <Route path="mis-solicitudes" element={<MisSolicitudes />} />
         </Route>
 
-        
-        <Route 
-          path="/admin" 
-          element={
-            <ProtectedRoute>
-              <DashboardLayout>
-                <AdminDashboard />
-              </DashboardLayout>
+        <Route path="/admin" element={
+            <ProtectedRoute requireAdmin={true}>
+              <DashboardLayout />
             </ProtectedRoute>
           } 
-        />
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="historial" element={<AdminHistorial />} />
+        </Route>
 
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="*" element={<Navigate to="/login" replace />} />

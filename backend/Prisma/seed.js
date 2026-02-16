@@ -4,8 +4,6 @@ import sha256 from 'sha256';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Iniciando siembra de datos...');
-
   const documentos = [
     {
       nombre: 'Formato de solicitud de balances',
@@ -70,45 +68,40 @@ async function main() {
   ];
 
   for (const doc of documentos) {
-    const existe = await prisma.tipoDocumento.findFirst({
-        where: { codigoPlantilla: doc.codigoPlantilla }
+    await prisma.tipoDocumento.upsert({
+      where: { id: documentos.indexOf(doc) + 1 },
+      update: doc,
+      create: doc
     });
-
-    if (!existe) {
-        await prisma.tipoDocumento.create({
-            data: doc
-        });
-        console.log(`+ Creado: ${doc.nombre}`);
-    }
   }
 
-  const emailAdmin = 'admin@aneupi.com';
-  const hashedPassword = sha256('admin123');
-  
-  const adminExiste = await prisma.usuario.findUnique({
-      where: { email: emailAdmin }
+  await prisma.usuario.upsert({
+    where: { email: 'admin@aneupi.com' },
+    update: {},
+    create: {
+      email: 'admin@aneupi.com',
+      password: sha256('admin123'),
+      rol: 'ADMIN',
+      nombreCompleto: 'Administrador Principal',
+      cedula: '0999999999',
+      direccion: 'Oficina Central',
+      telefono: '0999999999'
+    }
   });
 
-  if (adminExiste) {
-      await prisma.usuario.update({
-          where: { email: emailAdmin },
-          data: { password: hashedPassword }
-      });
-      console.log('Contraseña de Admin actualizada.');
-  } else {
-      await prisma.usuario.create({
-        data: {
-          email: emailAdmin,
-          password: hashedPassword,
-          rol: 'ADMIN',
-          nombreCompleto: 'Administrador Principal',
-          cedula: '0999999999',
-          direccion: 'Oficina Central',
-          telefono: '0999999999'
-        }
-      });
-      console.log('Usuario Admin creado.');
-  }
+  await prisma.usuario.upsert({
+    where: { email: 'accionista@aneupi.com' },
+    update: {},
+    create: {
+      email: 'accionista@aneupi.com',
+      password: sha256('user123'),
+      rol: 'USER',
+      nombreCompleto: 'Said Accionista Prueba',
+      cedula: '0888888888',
+      direccion: 'La Libertad',
+      telefono: '0888888888'
+    }
+  });
 }
 
 main()

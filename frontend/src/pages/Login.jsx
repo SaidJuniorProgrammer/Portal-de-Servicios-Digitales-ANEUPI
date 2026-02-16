@@ -21,43 +21,37 @@ const Login = () => {
     setLoading(true);
 
     try {
-      
       const res = await api.post('/api/usuarios/login', { email, password });
-      
-      
       const usuarioData = res.data.usuario || res.data; 
 
       if (!usuarioData || !usuarioData.email) {
-          throw new Error("Respuesta del servidor inválida");
+        throw new Error("Respuesta del servidor inválida");
       }
 
-      
       localStorage.setItem('usuario_aneupi', JSON.stringify(usuarioData));
       
-      
-      const nombreMostrar = usuarioData.nombre || usuarioData.nombreCompleto || "Usuario";
+      const nombreMostrar = usuarioData.nombreCompleto || usuarioData.nombre || "Usuario";
       toast.success(`Bienvenido, ${nombreMostrar}`);
       
-      
-      navigate('/dashboard', { replace: true });
+      if (usuarioData.rol === 'ADMIN') {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
 
     } catch (error) {
       console.error("Error en Login:", error);
       
-      
       if (error.response) {
-          
-          if (error.response.status === 401) {
-              toast.error("Contraseña incorrecta o usuario no encontrado");
-          } else {
-              toast.error(error.response.data.error || "Error al iniciar sesión");
-          }
+        if (error.response.status === 401) {
+          toast.error("Contraseña incorrecta o usuario no encontrado");
+        } else {
+          toast.error(error.response.data.error || "Error al iniciar sesión");
+        }
       } else if (error.request) {
-          
-          toast.error("No se pudo conectar con el servidor. Revisa tu conexión.");
+        toast.error("No se pudo conectar con el servidor. Revisa tu conexión.");
       } else {
-          
-          toast.error("Ocurrió un error inesperado.");
+        toast.error("Ocurrió un error inesperado.");
       }
     } finally {
       setLoading(false);

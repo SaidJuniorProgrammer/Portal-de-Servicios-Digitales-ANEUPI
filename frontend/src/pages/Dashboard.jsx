@@ -8,11 +8,8 @@ import { FaSpinner } from 'react-icons/fa';
 const Dashboard = () => {
   const [documentos, setDocumentos] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  
   const navigate = useNavigate();
 
-  // 1. Cargar documentos al iniciar
   useEffect(() => {
     const cargarDocumentos = async () => {
       try {
@@ -28,21 +25,24 @@ const Dashboard = () => {
     cargarDocumentos();
   }, []);
 
-  // 2. Función para manejar el clic en "Solicitar"
   const handleSolicitar = async (doc) => {
     try {
+      const data = localStorage.getItem('usuario_aneupi');
+      if (!data) {
+        toast.error("Sesión no válida. Por favor, inicia sesión de nuevo.");
+        navigate('/login');
+        return;
+      }
       
-      const USUARIO_ID_TEMPORAL = 1; 
+      const usuario = JSON.parse(data);
+      const USUARIO_ID = usuario.id;
 
-      
       await api.post('/api/solicitudes', {
-        usuarioId: USUARIO_ID_TEMPORAL,
+        usuarioId: USUARIO_ID,
         tipoDocumentoId: doc.id
       });
       
       toast.success(`Solicitud de "${doc.nombre}" creada.`);
-      
-      
       navigate('/dashboard/mis-solicitudes');
 
     } catch (error) {
@@ -60,13 +60,12 @@ const Dashboard = () => {
   }
 
   return (
-    <div>
+    <div className="animate-fade-in">
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-aneupi-primary font-serif">Formatos Disponibles</h2>
         <p className="text-gray-600 mt-1">Selecciona el documento que necesitas y sigue el proceso de solicitud.</p>
       </div>
 
-      {/* Rejilla de Tarjetas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {documentos.map((doc) => (
           <DocumentoCard 

@@ -1,4 +1,5 @@
 import { solicitudService } from '../../../services/solicitud.service.js';
+import { prisma } from '../../database/prisma.js';
 
 export const solicitudController = {
   async create(req, res) {
@@ -44,7 +45,15 @@ export const solicitudController = {
 
   async getAll(req, res) {
     try {
-      const solicitudes = await solicitudService.getAll();
+      const solicitudes = await prisma.solicitud.findMany({
+        include: {
+          usuario: true,
+          tipoDocumento: true
+        },
+        orderBy: {
+          fechaSolicitud: 'desc'
+        }
+      });
       res.json(solicitudes);
     } catch (error) {
       console.error(error);
@@ -74,7 +83,7 @@ export const solicitudController = {
 
   async updateEstado(req, res) {
     const { id } = req.params;
-    const { estado, observacionAdmin } = req.body;
+    const { estado, observacionAdmin, adminId, adminNombre } = req.body;
     const solicitudId = parseInt(id);
 
     if (isNaN(solicitudId)) {
@@ -87,6 +96,22 @@ export const solicitudController = {
 
     try {
       const solicitud = await solicitudService.updateEstado(solicitudId, estado, observacionAdmin);
+
+      try {
+        const idDelAdmin = adminId || req.user?.id || solicitud.usuarioId;
+        
+        await prisma.auditoria.create({
+          data: {
+            accion: `SOLICITUD_${estado}`,
+            detalle: observacionAdmin || `Cambio de estado a ${estado}`,
+            usuario: adminNombre || 'Administrador',
+            usuarioId: parseInt(idDelAdmin)
+          }
+        });
+      } catch (auditError) {
+        console.error(auditError);
+      }
+
       res.json(solicitud);
     } catch (error) {
       console.error(error);
@@ -118,7 +143,6 @@ export const solicitudController = {
     }
   },
 
-  
   async delete(req, res) {
     const { id } = req.params;
     const solicitudId = parseInt(id);
@@ -128,13 +152,10 @@ export const solicitudController = {
     }
 
     try {
-      
       if (solicitudService.delete) {
         await solicitudService.delete(solicitudId);
         res.json({ message: 'Solicitud eliminada correctamente' });
       } else {
-      
-        console.warn("Falta implementar delete en solicitud.service.js");
         res.status(501).json({ error: 'Función de eliminar no implementada en el servicio' });
       }
     } catch (error) {
