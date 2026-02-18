@@ -36,13 +36,16 @@ model Usuario {
 }
 
 model TipoDocumento {
-  id              Int         @id @default(autoincrement())
-  nombre          String
-  descripcion     String?
-  precio          Decimal     @db.Decimal(10, 2)
-  activo          Boolean     @default(true)
-  codigoPlantilla String 
-  solicitudes     Solicitud[]
+  id               Int         @id @default(autoincrement())
+  nombre           String
+  descripcion      String?
+  precio           Decimal     @db.Decimal(10, 2)
+  activo           Boolean     @default(true)
+  codigoPlantilla  String 
+  
+  camposRequeridos Json?       
+
+  solicitudes      Solicitud[]
 
   @@map("tipos_documentos")
 }
@@ -60,6 +63,8 @@ model Solicitud {
   
   codigoSolicitud    String?         @unique 
   
+  datosSolicitud     Json?           
+
   comprobantePagoUrl String? 
   nombreArchivo      String? 
   extensionArchivo   String? 

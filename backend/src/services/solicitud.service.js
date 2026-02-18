@@ -1,7 +1,8 @@
 import { prisma } from '../infrastructure/database/prisma.js';
+import { generarPDF } from './pdf.service.js';
 
 export const solicitudService = {
-  async create(usuarioId, tipoDocumentoId) {
+  async create(usuarioId, tipoDocumentoId, datosSolicitud) {
     const usuario = await prisma.usuario.findUnique({ 
       where: { id: usuarioId } 
     });
@@ -19,7 +20,8 @@ export const solicitudService = {
         usuarioId,
         tipoDocumentoId,
         precioAlSolicitar: documento.precio,
-        estado: 'PENDIENTE_PAGO'
+        estado: 'PENDIENTE_PAGO',
+        datosSolicitud
       }
     });
   },
@@ -80,7 +82,8 @@ export const solicitudService = {
 
   async updateEstado(solicitudId, estado, observacionAdmin) {
     const solicitud = await prisma.solicitud.findUnique({ 
-      where: { id: solicitudId } 
+      where: { id: solicitudId },
+      include: { usuario: true, tipoDocumento: true }
     });
     
     if (!solicitud) throw new Error('La solicitud no existe');
@@ -91,14 +94,27 @@ export const solicitudService = {
       fechaAprobacion: estado === 'APROBADO' ? new Date() : null
     };
 
-    if (estado === 'APROBADO' && !solicitud.codigoSolicitud) {
+    if (estado === 'APROBADO') {
       const year = new Date().getFullYear();
       const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
       let hashAleatorio = '';
       for (let i = 0; i < 4; i++) {
         hashAleatorio += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
       }
-      datosActualizar.codigoSolicitud = `ANEUPI-${year}-${solicitudId.toString().padStart(4, '0')}-${hashAleatorio}`;
+      
+      const codigoBlindado = solicitud.codigoSolicitud || `ANEUPI-${year}-${solicitudId.toString().padStart(4, '0')}-${hashAleatorio}`;
+      
+      const resultadoPdf = await generarPDF({
+        ...solicitud,
+        codigoSolicitud: codigoBlindado
+      });
+
+      if (resultadoPdf.error) {
+        throw new Error(resultadoPdf.error);
+      }
+
+      datosActualizar.codigoSolicitud = codigoBlindado;
+      datosActualizar.pdfGeneradoUrl = resultadoPdf;
     }
 
     return prisma.solicitud.update({
@@ -107,7 +123,7 @@ export const solicitudService = {
     });
   },
 
-  async uploadComprobante(solicitudId, imagenBase64, nombreArchivo, extensionArchivo) {
+  async uploadComprobante(solicitudId, pathArchivo, nombreArchivo, extensionArchivo) {
     const solicitud = await prisma.solicitud.findUnique({ 
       where: { id: solicitudId } 
     });
@@ -117,7 +133,7 @@ export const solicitudService = {
     return prisma.solicitud.update({
       where: { id: solicitudId },
       data: {
-        comprobantePagoUrl: imagenBase64,
+        comprobantePagoUrl: pathArchivo,
         nombreArchivo,
         extensionArchivo,
         estado: 'EN_REVISION'

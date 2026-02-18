@@ -4,6 +4,8 @@ import { FaFilePdf, FaClock, FaCheckCircle, FaTrash, FaExclamationCircle } from 
 import { toast } from 'sonner';
 import ModalSubirPago from '../components/ModalSubirPago';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 const MisSolicitudes = () => {
   const [solicitudes, setSolicitudes] = useState([]);
   const [solicitudSeleccionada, setSolicitudSeleccionada] = useState(null);
@@ -24,7 +26,30 @@ const MisSolicitudes = () => {
       setSolicitudes(res.data);
     } catch (error) {
       console.error(error);
+      toast.error("Error al cargar el historial");
     }
+  };
+
+  const handleDownload = (sol) => {
+    if (!sol.pdfGeneradoUrl) {
+      return toast.error("El archivo físico no se encuentra generado.");
+    }
+
+    const pathLimpio = sol.pdfGeneradoUrl.startsWith('/') 
+      ? sol.pdfGeneradoUrl 
+      : `/${sol.pdfGeneradoUrl}`;
+      
+    const urlCompleta = `${API_URL}${pathLimpio}`;
+    
+    const link = document.createElement('a');
+    link.href = urlCompleta;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success("Abriendo documento oficial...");
   };
 
   const handleRecargar = () => {
@@ -65,7 +90,6 @@ const MisSolicitudes = () => {
               <FaClock className="text-gray-300 text-2xl" />
             </div>
             <p className="text-gray-500 font-medium">No tienes solicitudes aún.</p>
-            <p className="text-gray-400 text-sm">Tus trámites aparecerán aquí una vez que los solicites.</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-100">
@@ -107,7 +131,6 @@ const MisSolicitudes = () => {
                         <button 
                           onClick={() => handleEliminar(sol.id)}
                           className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                          title="Eliminar solicitud"
                         >
                           <FaTrash />
                         </button>
@@ -115,7 +138,10 @@ const MisSolicitudes = () => {
                     )}
                     
                     {sol.estado === 'APROBADO' && (
-                      <button className="px-4 py-2 bg-green-600 text-white text-sm font-bold rounded-lg hover:bg-green-700 transition-colors cursor-pointer">
+                      <button 
+                        onClick={() => handleDownload(sol)}
+                        className="px-4 py-2 bg-green-600 text-white text-sm font-bold rounded-lg hover:bg-green-700 transition-colors cursor-pointer"
+                      >
                         Descargar PDF
                       </button>
                     )}
@@ -123,10 +149,10 @@ const MisSolicitudes = () => {
                 </div>
 
                 {sol.estado === 'RECHAZADO' && sol.observacionAdmin && (
-                  <div className="mt-4 p-3 bg-red-50 border-l-4 border-red-500 rounded-r-lg flex items-start gap-3 animate-fade-in-up">
+                  <div className="mt-4 p-3 bg-red-50 border-l-4 border-red-500 rounded-r-lg flex items-start gap-3">
                     <FaExclamationCircle className="text-red-500 mt-1 shrink-0" />
                     <div>
-                      <p className="text-xs font-bold text-red-700 uppercase tracking-wider">Motivo del rechazo:</p>
+                      <p className="text-xs font-bold text-red-700 uppercase">Motivo del rechazo:</p>
                       <p className="text-sm text-red-600 font-medium">{sol.observacionAdmin}</p>
                     </div>
                   </div>

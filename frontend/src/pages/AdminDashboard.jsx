@@ -3,6 +3,8 @@ import { toast } from 'sonner';
 import { FaCheck, FaTimes, FaEye, FaSearch, FaUserShield, FaExclamationTriangle } from 'react-icons/fa';
 import api from '../services/api';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const AdminDashboard = () => {
   const [solicitudes, setSolicitudes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -66,7 +68,6 @@ const AdminDashboard = () => {
 
   return (
     <div className="p-6 max-w-7xl mx-auto font-sans animate-fade-in">
-      
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 border-b border-gray-100 pb-6">
         <div>
           <h1 className="text-3xl font-bold text-aneupi-primary flex items-center gap-3">
@@ -202,7 +203,11 @@ const AdminDashboard = () => {
       {imagenModal && (
         <div className="fixed inset-0 bg-black/80 z-[70] flex items-center justify-center p-4 backdrop-blur-sm" onClick={() => setImagenModal(null)}>
           <div className="relative max-w-fit max-h-[90vh] animate-fade-in-up">
-            <img src={imagenModal} alt="Comprobante" className="max-w-full max-h-[85vh] rounded-lg shadow-2xl border-4 border-white" />
+            <img 
+              src={`${API_URL}${imagenModal}`} 
+              alt="Comprobante" 
+              className="max-w-full max-h-[85vh] rounded-lg shadow-2xl border-4 border-white" 
+            />
             <button className="absolute -top-4 -right-4 bg-red-500 text-white p-2 rounded-full shadow-lg hover:bg-red-600 cursor-pointer z-10" onClick={() => setImagenModal(null)}>
               <FaTimes />
             </button>
