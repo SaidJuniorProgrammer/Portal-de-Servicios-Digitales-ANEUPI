@@ -1,5 +1,3 @@
-// prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,22 +7,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// --- ENUMS (Estados del flujo) ---
-
 enum Rol {
   USER
   ADMIN
 }
 
-// El corazón del flujo
 enum EstadoSolicitud {
-  PENDIENTE_PAGO  // Usuario creó la solicitud, pero no ha subido comprobante
-  EN_REVISION     // Usuario subió comprobante, Admin debe revisar
-  APROBADO        // Admin aprobó, PDF generado y listo para descargar
-  RECHAZADO       // Admin rechazó el comprobante
+  PENDIENTE_PAGO
+  EN_REVISION
+  APROBADO
+  RECHAZADO
 }
-
-// --- MODELOS ---
 
 model Usuario {
   id           Int      @id @default(autoincrement())
@@ -41,46 +34,56 @@ model Usuario {
 
   solicitudes    Solicitud[]
   auditorias     Auditoria[] 
+  id              Int         @id @default(autoincrement())
+  email           String      @unique
+  password        String
+  rol             Rol         @default(USER)
+  fechaRegistro   DateTime    @default(now())
+  nombreCompleto  String
+  cedula          String      @unique
+  direccion       String?
+  telefono        String?
+  solicitudes     Solicitud[]
+  auditorias      Auditoria[] 
 
   @@map("usuarios")
 }
 
-// Catálogo de documentos disponibles (Ej: Certificado Bancario, $1.00)
 model TipoDocumento {
-  id            Int      @id @default(autoincrement())
-  nombre        String   // Ej: "Certificado de Cuenta Activa"
-  descripcion   String?
-  precio        Decimal  @db.Decimal(10, 2) // Ej: 1.00
-  activo        Boolean  @default(true)
+  id               Int         @id @default(autoincrement())
+  nombre           String
+  descripcion      String?
+  precio           Decimal     @db.Decimal(10, 2)
+  activo           Boolean     @default(true)
+  codigoPlantilla  String 
   
-  // Nombre interno de la plantilla (ej: "plantilla_certificado_v1")
-  codigoPlantilla String 
+  camposRequeridos Json?       
 
-  solicitudes   Solicitud[]
+  solicitudes      Solicitud[]
 
   @@map("tipos_documentos")
 }
 
-// La tabla central que une todo
 model Solicitud {
-  id               Int      @id @default(autoincrement())
+  id                 Int             @id @default(autoincrement())
+  usuarioId          Int
+  usuario            Usuario         @relation(fields: [usuarioId], references: [id])
+  tipoDocumentoId    Int
+  tipoDocumento      TipoDocumento   @relation(fields: [tipoDocumentoId], references: [id])
+  estado             EstadoSolicitud @default(PENDIENTE_PAGO)
+  precioAlSolicitar  Decimal         @db.Decimal(10, 2)
+  fechaSolicitud     DateTime        @default(now())
+  fechaAprobacion    DateTime?
   
-  usuarioId        Int
-  usuario          Usuario  @relation(fields: [usuarioId], references: [id])
+  codigoSolicitud    String?         @unique 
+  
+  datosSolicitud     Json?           
 
-  tipoDocumentoId  Int
-  tipoDocumento    TipoDocumento @relation(fields: [tipoDocumentoId], references: [id])
-
-  // Datos del proceso
-  estado           EstadoSolicitud @default(PENDIENTE_PAGO)
-  precioAlSolicitar Decimal        @db.Decimal(10, 2) // Guardamos el precio histórico
-  fechaSolicitud   DateTime        @default(now())
-  fechaAprobacion  DateTime?
-
-  // Archivos
-  comprobantePagoUrl String? // La foto que sube el usuario
-  pdfGeneradoUrl     String? // El PDF final que genera el sistema
-  observacionAdmin   String? // Si se rechaza, por qué
+  comprobantePagoUrl String? 
+  nombreArchivo      String? 
+  extensionArchivo   String? 
+  pdfGeneradoUrl     String? 
+  observacionAdmin   String? 
 
   @@map("solicitudes")
 }
@@ -94,6 +97,17 @@ model Auditoria {
   usuario      String?  // Usuario que ejecutó la acción (si aplica)
   usuarioId    Int
   usuarioRef   Usuario @relation(fields: [usuarioId], references: [id])
+}
+
+
+model Auditoria {
+  id         Int      @id @default(autoincrement())
+  fecha      DateTime @default(now())
+  accion     String
+  detalle    String?
+  usuario    String?
+  usuarioId  Int
+  usuarioRef Usuario  @relation(fields: [usuarioId], references: [id])
 
   @@map("auditorias")
 }
