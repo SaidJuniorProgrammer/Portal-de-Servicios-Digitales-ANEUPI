@@ -21,37 +21,60 @@ export const generarPDF = async (datos) => {
 
   const codigo = datos.codigoSolicitud || datos.codigo;
   const outputPath = path.join(solicitudesDir, `solicitud_${codigo}.pdf`);
-  
+
   if (!fs.existsSync(templatePath)) {
     throw new Error("No se encuentra ninguna plantilla .tex en el servidor.");
   }
 
   let contenido = fs.readFileSync(templatePath, 'utf8');
 
-  let fechaFinal = new Date().toLocaleDateString('es-EC', { 
-    year: 'numeric', month: 'long', day: 'numeric' 
+  let fechaFinal = new Date().toLocaleDateString('es-EC', {
+    year: 'numeric', month: 'long', day: 'numeric'
   });
 
   if (datos.datosSolicitud?.fechaAsamblea) {
     const [year, month, day] = datos.datosSolicitud.fechaAsamblea.split('-');
-    const fechaLocal = new Date(year, month - 1, day); 
-    fechaFinal = fechaLocal.toLocaleDateString('es-ES', { 
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+    const fechaLocal = new Date(year, month - 1, day);
+    fechaFinal = fechaLocal.toLocaleDateString('es-ES', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
   }
+
+  const ahora = new Date();
+
+  const fechaGenerado = ahora.toLocaleDateString('es-ES');
+  const horaGenerado = ahora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
   contenido = contenido
     .replace(/{{TITULO_DOCUMENTO}}/g, nombreTipo)
     .replace(/{{NOMBRE_ACCIONISTA}}/g, datos.usuario?.nombreCompleto || 'N/A')
+    .replace(/{{CORREO_ACCIONISTA}}/g, datos.usuario?.email || 'N/A')
     .replace(/{{CEDULA}}/g, datos.usuario?.cedula || 'N/A')
+    .replace(/{{TELEFONO}}/g, datos.usuario?.telefono || 'N/A')
+    .replace(/{{DIRECCION_SOLICITANTE}}/g, datos.usuario?.direccion || 'N/A')
     .replace(/{{FECHA_DOCUMENTO}}/g, fechaFinal)
-    .replace(/{{CODIGO_BLINDADO}}/g, codigo || 'SIN-CODIGO');
+    .replace(/{{FECHA_GENERADO}}/g, fechaGenerado)
+    .replace(/{{HORA_GENERADO}}/g, horaGenerado)
+    .replace(/{{CODIGO_BLINDADO}}/g, codigo || 'SIN-CODIGO')
+    .replace(/{{MOTIVO_RETIRO}}/g, datos.datosSolicitud?.razonRetiro || 'SIN-MOTIVO')
+    .replace(/{{AREA_VOLUNTARIADO}}/g, datos.datosSolicitud?.areaInteres || 'SIN-AREA')
+    .replace(/{{MONTO_CREDITO}}/g, datos.datosSolicitud?.monto || 'SIN-AREA')
+    .replace(/{{PLAZO_CREDITO}}/g, datos.datosSolicitud?.plazo || 'SIN-AREA')
+    .replace(/{{DESTINO_CREDITO}}/g, datos.datosSolicitud?.destino || 'SIN-AREA')
+    .replace(/{{MES_REPORTE}}/g, datos.datosSolicitud?.mesReporte || 'SIN-MES')
+    .replace(/{{INSTITUCION_EDUCATIVA}}/g, datos.datosSolicitud?.institucionEducativa || 'N/A')
+    .replace(/{{CARRERA}}/g, datos.datosSolicitud?.carrera || 'N/A')
+    .replace(/{{HORAS_PRACTICAS}}/g, datos.datosSolicitud?.horasPracticas || 'N/A')
+    .replace(/{{TEXTO_SOLICITUD_MULTA}}/g, datos.datosSolicitud?.codigoMulta || 'N/A')
+    ;
+
 
   const options = {
-    inputs: path.join(process.cwd(), 'src/templates'), 
-    fonts: path.join(process.cwd(), 'src/templates/assets'),
-    errorLogs: path.join(process.cwd(), 'temp_error.log')
+    cmd: 'C:\\Users\\User\\AppData\\Local\\Programs\\MiKTeX\\miktex\\bin\\x64\\pdflatex.exe',
+    inputs: path.join(process.cwd(), 'src/templates'),
+    errorLogs: path.join(process.cwd(), 'src/templates/assets/temp_error.log')
   };
+
 
   const output = fs.createWriteStream(outputPath);
   const pdf = latex(contenido, options);
