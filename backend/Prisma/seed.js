@@ -21,7 +21,7 @@ async function main() {
     {
       nombre: 'Formato de solicitud de balances',
       descripcion: 'Solicitud para obtener información de balances financieros.',
-      precio: 3.00,
+      precio: 100.00,
       codigoPlantilla: 'formato_de_solicitud_de_balances.tex',
       camposRequeridos: [
         { name: 'periodo', label: 'Período Contable (Año)', type: 'number' },
@@ -31,7 +31,7 @@ async function main() {
     {
       nombre: 'Formato de solicitud de ingreso de ser accionista',
       descripcion: 'Solicitud para ingresar como nuevo accionista de ANEUPI.',
-      precio: 5.00,
+      precio: 50.00,
       codigoPlantilla: 'formato_de_solicitud_de_ingreso_de_ser_accionista.tex',
       camposRequeridos: [
         { name: 'fechaIngreso', label: 'Fecha sugerida de ingreso', type: 'date' }
@@ -40,7 +40,7 @@ async function main() {
     {
       nombre: 'Formato de solicitud de retiro',
       descripcion: 'Solicitud para retiro de la asociación.',
-      precio: 2.50,
+      precio: 60.00,
       codigoPlantilla: 'formato_de_solicitud_de_retiro.tex',
       camposRequeridos: [
         { name: 'razonRetiro', label: 'Razón del retiro', type: 'text' }
@@ -49,7 +49,7 @@ async function main() {
     {
       nombre: 'Formato de solicitud de multas',
       descripcion: 'Solicitud relacionada con multas y sus valores.',
-      precio: 1.50,
+      precio: 5.00,
       codigoPlantilla: 'formato_de_solicitud_de_multas.tex',
       camposRequeridos: [
         { name: 'codigoMulta', label: 'Código de la multa (si aplica)', type: 'text' }
@@ -58,14 +58,14 @@ async function main() {
     {
       nombre: 'Formato de solicitud de accionista (Certificado de constancia)',
       descripcion: 'Certificado que constata la condición de accionista.',
-      precio: 4.00,
+      precio: 5.00,
       codigoPlantilla: 'formato_de_solicitud_de_accionista_(certificado_de_constancia).tex',
       camposRequeridos: []
     },
     {
-      nombre: 'Formato de solicitud de voluntariado',
+      nombre: 'Formato de solicitud de voluntariado sin paga',
       descripcion: 'Solicitud para participar en programas de voluntariado.',
-      precio: 1.00,
+      precio: 2.50,
       codigoPlantilla: 'formato_de_solicitud_de_voluntariado.tex',
       camposRequeridos: [
         { name: 'areaInteres', label: 'Área de interés (Salud, Educación, etc.)', type: 'text' }
@@ -74,7 +74,7 @@ async function main() {
     {
       nombre: 'Formato de solicitud de crédito',
       descripcion: 'Solicitud para obtener créditos financieros.',
-      precio: 6.00,
+      precio: 5.00,
       codigoPlantilla: 'formato_de_solicitud_de_credito.tex',
       camposRequeridos: [
         { name: 'monto', label: 'Monto solicitado ($)', type: 'number' },
@@ -85,14 +85,14 @@ async function main() {
     {
       nombre: 'Formato de solicitud sobre el paquete financiero de los accionistas',
       descripcion: 'Información sobre paquetes financieros disponibles para accionistas.',
-      precio: 4.50,
+      precio: 25.00,
       codigoPlantilla: 'formato_de_solicitud_sobre_el_paquete_financiero_de_los_accionistas.tex',
       camposRequeridos: []
     },
     {
       nombre: 'Formato de solicitud de ingresos y egresos',
       descripcion: 'Reporte de ingresos y egresos financieros.',
-      precio: 3.50,
+      precio: 100.00,
       codigoPlantilla: 'formato_de_solicitud_de_ingresos_y_egresos.tex',
       camposRequeridos: [
         { name: 'mesReporte', label: 'Mes del reporte solicitado', type: 'text' }
@@ -101,10 +101,39 @@ async function main() {
     {
       nombre: 'Formato general',
       descripcion: 'Formato adaptable para solicitudes diversas no contempladas en otros formatos.',
-      precio: 2.00,
+      precio: 2.50,
       codigoPlantilla: 'formato_general.tex',
       camposRequeridos: [
         { name: 'descripcionGeneral', label: 'Descripción detallada de la solicitud', type: 'text' }
+      ]
+    },
+
+    {
+      nombre: 'Solicitud para las practicas pre profesionales',
+      descripcion: 'Solicitud para solicitar las prácticas pre profesionales.',
+      precio: 2.50,
+      codigoPlantilla: 'formato_de_solicitud_para_practicas_pre_profesionales.tex',
+      camposRequeridos: [
+        { name: 'nombrePractica', label: 'Nombre de la práctica', type: 'text' },
+        { name: 'nombreInstitucion', label: 'Nombre de la institución', type: 'text' }
+      ]
+    },
+    {
+      nombre: 'Formato de solicitud para ser parte de la empresa',
+      descripcion: 'Solicitud para ser parte de la empresa.',
+      precio: 25.00,
+      codigoPlantilla: 'formato_de_solicitud_para_ser_parte_de_la_empresa.tex',
+      camposRequeridos: [
+        { name: 'mesReporte', label: 'Mes del reporte solicitado', type: 'text' }
+      ]
+    },
+    {
+      nombre: 'Formato de solicitud para voluntariado con paga',
+      descripcion: 'Solicitud para participar en programas de voluntariado con paga.',
+      precio: 10.00,
+      codigoPlantilla: 'formato_de_solicitud_para_voluntariado_con_paga.tex',
+      camposRequeridos: [
+        { name: 'mesReporte', label: 'Mes del reporte solicitado', type: 'text' }
       ]
     }
   ];

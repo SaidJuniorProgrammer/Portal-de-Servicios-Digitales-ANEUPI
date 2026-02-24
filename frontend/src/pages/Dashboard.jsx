@@ -2,14 +2,12 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom'; 
 import api from '../services/api';
 import DocumentoCard from '../components/DocumentoCard';
-import ModalFormularioDinamico from '../components/ModalFormularioDinamico';
 import { toast } from 'sonner';
 import { FaSpinner } from 'react-icons/fa';
 
 const Dashboard = () => {
   const [documentos, setDocumentos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [docParaFormulario, setDocParaFormulario] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,15 +25,7 @@ const Dashboard = () => {
     cargarDocumentos();
   }, []);
 
-  const handleSolicitar = (doc) => {
-    if (doc.camposRequeridos && doc.camposRequeridos.length > 0) {
-      setDocParaFormulario(doc);
-    } else {
-      enviarSolicitudFinal(doc.id, doc.nombre, {});
-    }
-  };
-
-  const enviarSolicitudFinal = async (docId, nombreDoc, datosExtras) => {
+  const handleSolicitar = async (doc) => {
     try {
       const data = localStorage.getItem('usuario_aneupi');
       if (!data) {
@@ -48,11 +38,10 @@ const Dashboard = () => {
 
       await api.post('/api/solicitudes', {
         usuarioId: usuario.id,
-        tipoDocumentoId: docId,
-        datosSolicitud: datosExtras
+        tipoDocumentoId: doc.id
       });
       
-      toast.success(`Solicitud de "${nombreDoc}" creada.`);
+      toast.success(`Solicitud de "${doc.nombre}" creada.`);
       navigate('/dashboard/mis-solicitudes');
 
     } catch (error) {
@@ -85,17 +74,6 @@ const Dashboard = () => {
           />
         ))}
       </div>
-
-      {docParaFormulario && (
-        <ModalFormularioDinamico 
-          documento={docParaFormulario}
-          onClose={() => setDocParaFormulario(null)}
-          onConfirm={(datos) => {
-            enviarSolicitudFinal(docParaFormulario.id, docParaFormulario.nombre, datos);
-            setDocParaFormulario(null);
-          }}
-        />
-      )}
     </div>
   );
 };

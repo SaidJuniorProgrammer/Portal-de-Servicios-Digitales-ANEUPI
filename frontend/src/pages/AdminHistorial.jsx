@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
-import { FaHistory, FaSearch, FaFilePdf, FaBarcode } from 'react-icons/fa';
+import { FaHistory, FaSearch, FaBarcode } from 'react-icons/fa';
 import api from '../services/api';
 import { toast } from 'sonner';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const AdminHistorial = () => {
   const [solicitudes, setSolicitudes] = useState([]);
@@ -17,7 +15,6 @@ const AdminHistorial = () => {
   const fetchAprobados = async () => {
     try {
       const res = await api.get('/api/solicitudes');
-     
       const aprobados = res.data.filter(s => s.estado === 'APROBADO');
       setSolicitudes(aprobados);
     } catch (error) {
@@ -26,27 +23,6 @@ const AdminHistorial = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleVerPDF = (pdfUrl) => {
-    if (!pdfUrl) {
-      return toast.error("Este documento no tiene un archivo físico generado.");
-    }
-
-    
-    const pathLimpio = pdfUrl.startsWith('/') ? pdfUrl : `/${pdfUrl}`;
-    const urlCompleta = `${API_URL}${pathLimpio}`;
-
-    
-    const link = document.createElement('a');
-    link.href = urlCompleta;
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    toast.success("Visualizando documento oficial...");
   };
 
   const filtrados = solicitudes.filter(s => 
@@ -62,7 +38,7 @@ const AdminHistorial = () => {
             <FaHistory className="text-aneupi-secondary" />
             Historial de Documentos
           </h1>
-          <p className="text-gray-500">Consulta y descarga de solicitudes finalizadas</p>
+          <p className="text-gray-500">Consulta de códigos de solicitudes finalizadas</p>
         </div>
 
         <div className="relative w-80">
@@ -85,14 +61,13 @@ const AdminHistorial = () => {
               <th className="p-4">Accionista</th>
               <th className="p-4">Documento</th>
               <th className="p-4">Fecha Aprobación</th>
-              <th className="p-4 text-center">Archivo</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {loading ? (
-              <tr><td colSpan="5" className="p-10 text-center text-gray-400">Cargando historial...</td></tr>
+              <tr><td colSpan="4" className="p-10 text-center text-gray-400">Cargando historial...</td></tr>
             ) : filtrados.length === 0 ? (
-              <tr><td colSpan="5" className="p-10 text-center text-gray-400">No se encontraron documentos aprobados.</td></tr>
+              <tr><td colSpan="4" className="p-10 text-center text-gray-400">No se encontraron documentos aprobados.</td></tr>
             ) : (
               filtrados.map((sol) => (
                 <tr key={sol.id} className="hover:bg-gray-50 transition-colors">
@@ -107,15 +82,6 @@ const AdminHistorial = () => {
                   </td>
                   <td className="p-4 text-sm text-gray-500">
                     {sol.fechaAprobacion ? new Date(sol.fechaAprobacion).toLocaleDateString() : 'N/A'}
-                  </td>
-                  <td className="p-4 text-center">
-                    <button 
-                      onClick={() => handleVerPDF(sol.pdfGeneradoUrl)}
-                      className={`text-xl transition-all transform active:scale-90 ${sol.pdfGeneradoUrl ? 'text-red-500 hover:text-red-700 cursor-pointer' : 'text-gray-200 cursor-not-allowed'}`}
-                      title={sol.pdfGeneradoUrl ? "Ver PDF oficial" : "PDF no disponible"}
-                    >
-                      <FaFilePdf />
-                    </button>
                   </td>
                 </tr>
               ))
