@@ -2,6 +2,20 @@ import latex from 'node-latex';
 import fs from 'fs';
 import path from 'path';
 
+const escapeLatex = (text = '') => {
+  return String(text)
+    .replace(/\\/g, '\\textbackslash{}')
+    .replace(/&/g, '\\&')
+    .replace(/%/g, '\\%')
+    .replace(/\$/g, '\\$')
+    .replace(/#/g, '\\#')
+    .replace(/_/g, '\\_')
+    .replace(/{/g, '\\{')
+    .replace(/}/g, '\\}')
+    .replace(/~/g, '\\textasciitilde{}')
+    .replace(/\^/g, '\\textasciicircum{}');
+};
+
 export const generarPDF = async (datos) => {
   const solicitudesDir = path.join(process.cwd(), 'public/solicitudes');
   if (!fs.existsSync(solicitudesDir)) {
@@ -45,6 +59,15 @@ export const generarPDF = async (datos) => {
   const fechaGenerado = ahora.toLocaleDateString('es-ES');
   const horaGenerado = ahora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
+  let textoMulta = '';
+  const codigoMulta = datos.datosSolicitud?.codigoMulta?.trim();
+
+  if (codigoMulta) {
+    textoMulta = `Se me informe el detalle correspondiente a la multa identificada con el código ${codigoMulta}.`;
+  } else {
+    textoMulta = `Se me informe el detalle de todas las multas registradas a mi nombre en la Institución Financiera ANEUPI.`;
+  }
+
   contenido = contenido
     .replace(/{{TITULO_DOCUMENTO}}/g, nombreTipo)
     .replace(/{{NOMBRE_ACCIONISTA}}/g, datos.usuario?.nombreCompleto || 'N/A')
@@ -65,7 +88,10 @@ export const generarPDF = async (datos) => {
     .replace(/{{INSTITUCION_EDUCATIVA}}/g, datos.datosSolicitud?.institucionEducativa || 'N/A')
     .replace(/{{CARRERA}}/g, datos.datosSolicitud?.carrera || 'N/A')
     .replace(/{{HORAS_PRACTICAS}}/g, datos.datosSolicitud?.horasPracticas || 'N/A')
-    .replace(/{{TEXTO_SOLICITUD_MULTA}}/g, datos.datosSolicitud?.codigoMulta || 'N/A')
+    .replace(/{{TEXTO_SOLICITUD_MULTA}}/g, escapeLatex(textoMulta))
+    .replace(/{{DESCRIPCION_SOLICITUD}}/g, escapeLatex(datos.datosSolicitud?.descripcionGeneral || 'SIN DESCRIPCIÓN'))
+    .replace(/{{PERIODO_CONTABLE}}/g, escapeLatex(datos.datosSolicitud?.periodo || 'NO ESPECIFICADO'))
+    .replace(/{{MOTIVO_SOLICITUD}}/g, escapeLatex(datos.datosSolicitud?.motivo || 'NO ESPECIFICADO'))
     ;
 
 

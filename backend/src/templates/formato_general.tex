@@ -4,43 +4,73 @@
 \usepackage{graphicx}
 \usepackage{geometry}
 \usepackage{xcolor}
-\usepackage{wallpaper} 
+\usepackage{wallpaper}
 
 \geometry{top=5.5cm, bottom=4cm, left=2.5cm, right=2.5cm}
+
+\setlength{\parindent}{0pt}
 
 \begin{document}
 \CenterWallPaper{1}{assets/Fondo-de-Aneupi.png}
 
+\vspace*{-4.5cm}
+\noindent
+\hfill
+{\footnotesize \textcolor{blue}{\textbf{\detokenize{ {{CODIGO_BLINDADO}} }}}}
+
+\vspace{2.5cm}
+\noindent
+\hspace*{\dimexpr\textwidth+1cm\relax}
+\makebox[0pt][r]{\footnotesize\textbf{{{FECHA_GENERADO}} \hspace{0.5cm} {{{HORA_GENERADO}}}}}
+
 \begin{center}
-    \textbf{\large {{TITULO_DOCUMENTO}}}
+        \textbf{\large FORMATO GENERAL DE SOLICITUD}
 \end{center}
 
 \vspace{0.8cm}
 
-\noindent \textbf{DIRIGIDO A:} {{NOMBRE_ACCIONISTA}} \\
-\textbf{IDENTIFICACIÓN:} {{CEDULA}}
+\noindent \textbf{Henry Ricardo Erraez Mora} \\
+
+\noindent Presidente Institución Financiera ANEUPI \\
+
+\vspace{0.5cm}
+
+\noindent En su despacho.-
+
+\vspace{0.5cm}
+
+\noindent De mi consideración:
+
+\vspace{0.5cm}
+
+\noindent 
+Yo, \textbf{{{NOMBRE_ACCIONISTA}}}, portador(a) de la cédula de identidad N.\textbf{{{CEDULA}}}, domiciliado(a) en \textbf{{{DIRECCION_SOLICITANTE}}}, por medio de la presente me permito exponer lo siguiente:
 
 \vspace{0.8cm}
 
-\begin{center}
-    \textit{Este documento se encuentra en proceso de redacción oficial.}
-\end{center}
+
+\noindent
+\textbf{{{DESCRIPCION_SOLICITUD}}}
 
 \vspace{1cm}
 
-% Aquí pegarás el texto que te entregue tu jefe
-El contenido detallado para la solicitud de \textbf{{{TITULO_DOCUMENTO}}} será insertado en esta sección una vez validado por la presidencia de ANEUPI.
+\noindent
+Agradezco de antemano la atención brindada a la presente solicitud y quedo atento(a) a la respuesta correspondiente conforme a la normativa institucional vigente.
 
-\vspace{4cm}
+\vspace{1.5cm}
 
-\begin{center}
-    \textbf{Henry Ricardo Erraez} \\
-    Presidente Institución Financiera ANEUPI
-\end{center}
+Atentamente,
 
-\vfill
-\begin{center}
-    \footnotesize \textbf{\textcolor{blue}{VERIFICACIÓN DIGITAL: {{CODIGO_BLINDADO}}}}
-\end{center}
+\vspace{1cm}
+
+\noindent \textbf{{{NOMBRE_ACCIONISTA}}}
+
+\noindent CI: \textbf{{{CEDULA}}}
+
+\noindent Correo: \textbf{{{CORREO_ACCIONISTA}}}
+
+\noindent Whatsapp: \textbf{{{TELEFONO}}}
+
+\vspace{0.5cm}
 
 \end{document}
