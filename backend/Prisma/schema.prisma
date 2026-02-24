@@ -20,17 +20,17 @@ enum EstadoSolicitud {
 }
 
 model Usuario {
-  id              Int         @id @default(autoincrement())
-  email           String      @unique
-  password        String
-  rol             Rol         @default(USER)
-  fechaRegistro   DateTime    @default(now())
-  nombreCompleto  String
-  cedula          String      @unique
-  direccion       String?
-  telefono        String?
-  solicitudes     Solicitud[]
-  auditorias      Auditoria[] 
+  id             Int         @id @default(autoincrement())
+  email          String      @unique
+  password       String
+  rol            Rol         @default(USER)
+  fechaRegistro  DateTime    @default(now())
+  nombreCompleto String
+  cedula         String      @unique
+  direccion      String?
+  telefono       String?
+  solicitudes    Solicitud[]
+  auditorias     Auditoria[] 
 
   @@map("usuarios")
 }
@@ -42,9 +42,7 @@ model TipoDocumento {
   precio           Decimal     @db.Decimal(10, 2)
   activo           Boolean     @default(true)
   codigoPlantilla  String 
-  
   camposRequeridos Json?       
-
   solicitudes      Solicitud[]
 
   @@map("tipos_documentos")
@@ -60,11 +58,8 @@ model Solicitud {
   precioAlSolicitar  Decimal         @db.Decimal(10, 2)
   fechaSolicitud     DateTime        @default(now())
   fechaAprobacion    DateTime?
-  
   codigoSolicitud    String?         @unique 
-  
   datosSolicitud     Json?           
-
   comprobantePagoUrl String? 
   nombreArchivo      String? 
   extensionArchivo   String? 
