@@ -18,10 +18,8 @@ const escapeLatex = (text = '') => {
 
 export const generarPDF = async (datos) => {
   const nombreTipo = datos.tipoDocumento?.nombre || datos.tipoDocumento || 'DOCUMENTO OFICIAL';
-  const nombreAsamblea = 'Convocatoria A Asamblea General Ordinaria De Accionistas Fundadores';
-  const esAsamblea = nombreTipo === nombreAsamblea;
 
-  let nombreArchivo = esAsamblea ? 'plantilla.tex' : `${nombreTipo.toLowerCase().replace(/ /g, '_')}.tex`;
+  let nombreArchivo = datos.tipoDocumento?.codigoPlantilla || 'plantilla.tex';
   let templatePath = path.join(process.cwd(), 'src/templates', nombreArchivo);
 
   if (!fs.existsSync(templatePath)) {
@@ -64,6 +62,8 @@ export const generarPDF = async (datos) => {
     .replace(/{{DESCRIPCION_SOLICITUD}}/g, 'NO APLICA')
     .replace(/{{PERIODO_CONTABLE}}/g, '0')
     .replace(/{{MOTIVO_SOLICITUD}}/g, 'NO APLICA');
+
+  contenido = contenido.replace(/{{.*?}}/g, 'NO APLICA');
 
   const options = {
     cmd: 'C:\\Users\\said2\\AppData\\Local\\Programs\\MiKTeX\\miktex\\bin\\x64\\pdflatex.exe',
