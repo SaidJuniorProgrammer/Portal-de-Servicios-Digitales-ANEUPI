@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { FaCheck, FaTimes, FaEye, FaSearch, FaUserShield, FaExclamationTriangle } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaEye, FaSearch, FaUserShield, FaExclamationTriangle, FaSpinner } from 'react-icons/fa';
 import api from '../services/api';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -8,6 +8,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 const AdminDashboard = () => {
   const [solicitudes, setSolicitudes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [filtro, setFiltro] = useState('');
   const [imagenModal, setImagenModal] = useState(null);
   const [modalConfirm, setModalConfirm] = useState({ open: false, id: null, estado: '' });
@@ -31,12 +32,15 @@ const AdminDashboard = () => {
   };
 
   const ejecutarCambioEstado = async () => {
+    if (isSubmitting) return;
+
     const { id, estado } = modalConfirm;
     
     if (estado === 'RECHAZADO' && !motivoRechazo.trim()) {
       return toast.warning("Debes ingresar un motivo para el rechazo");
     }
 
+    setIsSubmitting(true);
     const adminData = JSON.parse(localStorage.getItem('usuario_aneupi'));
 
     try {
@@ -48,15 +52,19 @@ const AdminDashboard = () => {
       });
       
       toast.success(`Solicitud ${estado} con éxito`);
-      cerrarModales();
+      setModalConfirm({ open: false, id: null, estado: '' });
+      setMotivoRechazo('');
       fetchSolicitudes();
     } catch (error) {
       console.error(error);
       toast.error("Error al actualizar estado");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const cerrarModales = () => {
+    if (isSubmitting) return;
     setModalConfirm({ open: false, id: null, estado: '' });
     setMotivoRechazo('');
   };
@@ -173,7 +181,8 @@ const AdminDashboard = () => {
                     value={motivoRechazo}
                     onChange={(e) => setMotivoRechazo(e.target.value)}
                     placeholder="Escribe aquí el motivo del rechazo..."
-                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 outline-none text-sm h-24 resize-none bg-white text-gray-700"
+                    disabled={isSubmitting}
+                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 outline-none text-sm h-24 resize-none bg-white text-gray-700 disabled:bg-gray-100 disabled:cursor-not-allowed"
                     required
                   />
                 </div>
@@ -182,17 +191,24 @@ const AdminDashboard = () => {
               <div className="flex justify-end gap-3 mt-6">
                 <button 
                   onClick={cerrarModales}
-                  className="px-4 py-2 text-gray-500 hover:text-gray-700 font-medium transition-colors cursor-pointer"
+                  disabled={isSubmitting}
+                  className={`px-4 py-2 text-gray-500 font-medium transition-colors ${
+                    isSubmitting ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'hover:text-gray-700 cursor-pointer'
+                  }`}
                 >
                   Cancelar
                 </button>
                 <button 
                   onClick={ejecutarCambioEstado}
-                  className={`px-6 py-2 rounded-xl text-white font-bold shadow-lg transition-transform active:scale-95 cursor-pointer ${
+                  disabled={isSubmitting}
+                  className={`px-6 py-2 rounded-xl text-white font-bold shadow-lg transition-all flex items-center gap-2 ${
+                    isSubmitting ? 'opacity-70 cursor-not-allowed pointer-events-none' : 'active:scale-95 cursor-pointer hover:scale-105'
+                  } ${
                     modalConfirm.estado === 'APROBADO' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'
                   }`}
                 >
-                  Confirmar {modalConfirm.estado === 'APROBADO' ? 'Aprobación' : 'Rechazo'}
+                  {isSubmitting && <FaSpinner className="animate-spin" />}
+                  {isSubmitting ? 'Procesando...' : `Confirmar ${modalConfirm.estado === 'APROBADO' ? 'Aprobación' : 'Rechazo'}`}
                 </button>
               </div>
             </div>

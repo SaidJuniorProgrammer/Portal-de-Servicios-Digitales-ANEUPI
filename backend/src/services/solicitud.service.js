@@ -1,5 +1,4 @@
 import { prisma } from '../infrastructure/database/prisma.js';
-import { generarPDF } from './pdf.service.js';
 
 export const solicitudService = {
   async create(usuarioId, tipoDocumentoId, datosSolicitud) {
@@ -82,44 +81,18 @@ export const solicitudService = {
 
   async updateEstado(solicitudId, estado, observacionAdmin) {
     const solicitud = await prisma.solicitud.findUnique({ 
-      where: { id: solicitudId },
-      include: { usuario: true, tipoDocumento: true }
+      where: { id: solicitudId }
     });
     
     if (!solicitud) throw new Error('La solicitud no existe');
 
-    let datosActualizar = {
-      estado,
-      observacionAdmin,
-      fechaAprobacion: estado === 'APROBADO' ? new Date() : null
-    };
-
-    if (estado === 'APROBADO') {
-      const year = new Date().getFullYear();
-      const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      let hashAleatorio = '';
-      for (let i = 0; i < 4; i++) {
-        hashAleatorio += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
-      }
-      
-      const codigoBlindado = solicitud.codigoSolicitud || `ANEUPI-${year}-${solicitudId.toString().padStart(4, '0')}-${hashAleatorio}`;
-      
-      const resultadoPdf = await generarPDF({
-        ...solicitud,
-        codigoSolicitud: codigoBlindado
-      });
-
-      if (resultadoPdf.error) {
-        throw new Error(resultadoPdf.error);
-      }
-
-      datosActualizar.codigoSolicitud = codigoBlindado;
-      datosActualizar.pdfGeneradoUrl = resultadoPdf;
-    }
-
     return prisma.solicitud.update({
       where: { id: solicitudId },
-      data: datosActualizar
+      data: {
+        estado,
+        observacionAdmin,
+        fechaAprobacion: estado === 'APROBADO' ? new Date() : null
+      }
     });
   },
 

@@ -1,6 +1,7 @@
 import { solicitudService } from '../../../services/solicitud.service.js';
 import { prisma } from '../../database/prisma.js';
 import { generarPDF } from '../../../services/pdf.service.js';
+import { enviarCorreoConPDF } from '../../../services/email.service.js';
 
 export const solicitudController = {
   async create(req, res) {
@@ -107,16 +108,57 @@ export const solicitudController = {
           }
         });
 
-        const resultadoPdf = await generarPDF(solicitudCompleta);
-
-        if (resultadoPdf.error) {
-          return res.status(400).json({ error: resultadoPdf.error });
+        const year = new Date().getFullYear();
+        const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let hashAleatorio = '';
+        for (let i = 0; i < 4; i++) {
+          hashAleatorio += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
         }
+        
+        const codigoBlindado = `ANEUPI-${year}-${solicitudId.toString().padStart(4, '0')}-${hashAleatorio}`;
 
-        solicitudActualizada = await prisma.solicitud.update({
-          where: { id: solicitudId },
-          data: { pdfGeneradoUrl: resultadoPdf }
-        });
+        solicitudCompleta.codigoSolicitud = codigoBlindado;
+
+        try {
+          const pdfBufferMemoria = await generarPDF(solicitudCompleta);
+
+          const mensajeHtml = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+              <h2 style="color: #0ea5e9; text-align: center;">¡Solicitud Aprobada!</h2>
+              <p>Hola <strong>${solicitudCompleta.usuario.nombreCompleto || 'Accionista'}</strong>,</p>
+              <p>Tu solicitud para el documento <strong>"${solicitudCompleta.tipoDocumento.nombre}"</strong> ha sido aprobada con éxito.</p>
+              
+              <div style="background-color: #f3f4f6; padding: 20px; text-align: center; border-radius: 8px; margin: 20px 0;">
+                <p style="margin: 0; font-size: 14px; color: #4b5563;">TU CÓDIGO ÚNICO ES:</p>
+                <h1 style="margin: 10px 0 0 0; color: #16a34a; font-size: 32px; letter-spacing: 4px;">${codigoBlindado}</h1>
+              </div>
+              
+              <p>Adjunto a este correo encontrarás tu documento oficial en formato PDF.</p>
+              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+              <p style="font-size: 12px; color: #9ca3af; text-align: center;">Este es un mensaje automático de ANEUPI.</p>
+            </div>
+          `;
+
+          await enviarCorreoConPDF(
+            solicitudCompleta.usuario.email,
+            'Tu documento ha sido Aprobado - ANEUPI',
+            mensajeHtml,
+            pdfBufferMemoria,
+            `Documento_ANEUPI_${codigoBlindado}.pdf`
+          );
+
+          solicitudActualizada = await prisma.solicitud.update({
+            where: { id: solicitudId },
+            data: { 
+              pdfGeneradoUrl: "ENVIADO_AL_CORREO",
+              codigoSolicitud: codigoBlindado
+            }
+          });
+
+        } catch (pdfError) {
+          console.error("Error en PDF o Correo:", pdfError);
+          return res.status(500).json({ error: 'Error al generar o enviar el documento PDF.' });
+        }
       }
 
       try {
