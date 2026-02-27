@@ -9,17 +9,18 @@
 \geometry{top=5.5cm, bottom=4cm, left=2.5cm, right=2.5cm}
 
 \begin{document}
+\pagestyle{empty}
 \CenterWallPaper{1}{assets/Fondo-de-Aneupi.png}
 
-\vspace*{-4.5cm}
-\noindent
-\hfill
-{\footnotesize \textcolor{blue}{\textbf{ \detokenize{ {{CODIGO_BLINDADO}} }}}}
-
+\vspace*{-5.5cm}
+\begin{flushright}
+{\footnotesize \textcolor{black}{\textbf{{{FECHA_GENERADO}} --- {{{HORA_GENERADO}}}}}} \\[-10pt] %
+{\footnotesize \textcolor{black}{\underline{\hspace{7.5cm}}}} \\[-2pt] % 
+{\footnotesize \textcolor{black}{\textbf{Oficio N° \detokenize{{{CODIGO_BLINDADO}}}}}} 
+\end{flushright}
 \vspace{2.5cm}
 \noindent
 \hspace*{\dimexpr\textwidth+1cm\relax}
-\makebox[0pt][r]{\footnotesize\textbf{{{FECHA_GENERADO}} \hspace{0.5cm} {{{HORA_GENERADO}}}}}
 
 \begin{center}
     \textbf{\large FORMATO DE SOLICITUD DE ACCIONISTA (CERTIFICADO DE CONSTANCIA) }
@@ -27,21 +28,17 @@
 
 \vspace{0.8cm}
 
-\noindent Henry Ricardo Erraez Mora \\
+\noindent \textbf{Henry Ricardo Erraez Mora} 
 
-\noindent Presidente Institución Financiera ANEUPI \\
-
-\vspace{0.5cm}
+\noindent Presidente Institución Financiera ANEUPI 
 
 \noindent En su despacho.-
 
-\vspace{0.5cm}
+\vspace{1cm}
 
 \noindent De mi consideración:
 
-\vspace{0.5cm}
-
-\noindent Yo, \textbf{{{NOMBRE_ACCIONISTA}}}, portador(a) de la cédula de identidad N.\textbf{{{CEDULA}}}, domiciliado(a) en \textbf{{{DIRECCION_SOLICITANTE}}}, por medio de la presente me dirijo a usted con el debido respeto para solicitar la emisión del Certificado de Constancia que acredite mi calidad de accionista dentro de la Institución Financiera ANEUPI.
+\noindent Yo, \textbf{\underline{\hspace{6cm}}}, portador(a) de la cédula de identidad N.\textbf{\underline{\hspace{4cm}}}, domiciliado(a) en \textbf{\underline{\hspace{6cm}}}, por medio de la presente me dirijo a usted con el debido respeto para solicitar la emisión del Certificado de Constancia que acredite mi calidad de accionista dentro de la Institución Financiera ANEUPI.
 
 \vspace{0.5cm}
 
@@ -51,20 +48,19 @@
 
 \noindent Agradezco se sirva disponer la elaboración y entrega del documento correspondiente conforme a los registros institucionales.
 
-\vspace{2cm}
+\vspace{1cm}
 
-Atentamente,
+\noindent Atentamente,
 
-\vspace{1.5cm}
+\vspace{2.5cm}
 
-\noindent \textbf{{{NOMBRE_ACCIONISTA}}}
 
-\noindent CI: \textbf{{{CEDULA}}}
+\noindent\makebox[3cm][l]{Nombres:}  
 
-\noindent Correo: \textbf{{{CORREO_ACCIONISTA}}}
+\noindent\makebox[3cm][l]{CI:}      
 
-\noindent Whatsapp: \textbf{{{TELEFONO}}}
+\noindent\makebox[3cm][l]{Correo:}  
 
-\vspace{0.5cm}
+\noindent\makebox[3cm][l]{Whatsapp:} 
 
 \end{document}
