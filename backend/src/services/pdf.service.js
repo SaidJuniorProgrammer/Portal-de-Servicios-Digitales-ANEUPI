@@ -16,6 +16,16 @@ const escapeLatex = (text = '') => {
     .replace(/\^/g, '\\textasciicircum{}');
 };
 
+const diasSemana = [
+  'Domingo',
+  'Lunes',
+  'Martes',
+  'Miércoles',
+  'Jueves',
+  'Viernes',
+  'Sábado'
+];
+
 export const generarPDF = async (datos) => {
   const nombreTipo = datos.tipoDocumento?.nombre || datos.tipoDocumento || 'DOCUMENTO OFICIAL';
 
@@ -34,8 +44,26 @@ export const generarPDF = async (datos) => {
 
   let contenido = fs.readFileSync(templatePath, 'utf8');
 
-  const ahora = new Date();
-  const fechaGenerado = ahora.toLocaleDateString('es-ES');
+  let fechaFinal = new Date().toLocaleDateString('es-EC', {
+    year: 'numeric', month: 'long', day: 'numeric'
+  });
+
+  if (datos.datosSolicitud?.fechaAsamblea) {
+    const [year, month, day] = datos.datosSolicitud.fechaAsamblea.split('-');
+    const fechaLocal = new Date(year, month - 1, day);
+    fechaFinal = fechaLocal.toLocaleDateString('es-ES', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+  }
+
+const ahora = new Date();
+
+const diaSemana = ahora.toLocaleDateString('es-ES', { weekday: 'long' });
+const diaNumero = ahora.getDate();
+const mesNombre = ahora.toLocaleDateString('es-ES', { month: 'long' });
+const anio = ahora.getFullYear();
+
+const fechaGenerado = `${diaSemana}, ${diaNumero} de ${mesNombre} del ${anio}`;
   const horaGenerado = ahora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
   contenido = contenido
