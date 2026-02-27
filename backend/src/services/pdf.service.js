@@ -16,6 +16,16 @@ const escapeLatex = (text = '') => {
     .replace(/\^/g, '\\textasciicircum{}');
 };
 
+const diasSemana = [
+  'Domingo',
+  'Lunes',
+  'Martes',
+  'Miércoles',
+  'Jueves',
+  'Viernes',
+  'Sábado'
+];
+
 export const generarPDF = async (datos) => {
   const solicitudesDir = path.join(process.cwd(), 'public/solicitudes');
   if (!fs.existsSync(solicitudesDir)) {
@@ -54,9 +64,14 @@ export const generarPDF = async (datos) => {
     });
   }
 
-  const ahora = new Date();
+const ahora = new Date();
 
-  const fechaGenerado = ahora.toLocaleDateString('es-ES');
+const diaSemana = ahora.toLocaleDateString('es-ES', { weekday: 'long' });
+const diaNumero = ahora.getDate();
+const mesNombre = ahora.toLocaleDateString('es-ES', { month: 'long' });
+const anio = ahora.getFullYear();
+
+const fechaGenerado = `${diaSemana}, ${diaNumero} de ${mesNombre} del ${anio}`;
   const horaGenerado = ahora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
   let textoMulta = '';
