@@ -12,15 +12,18 @@
 \pagestyle{empty}
 \CenterWallPaper{1}{assets/Fondo-de-Aneupi.png}
 
-\vspace*{-4.5cm}
-\noindent
-\hfill
-{\footnotesize \textcolor{black}{\textbf{Oficio N° \detokenize{ {{CODIGO_BLINDADO}} }}}}
+\vspace*{-5.5cm}
+\begin{flushright}
+{\footnotesize \textcolor{black}{\textbf{{{FECHA_GENERADO}} --- {{{HORA_GENERADO}}}}}} \\[-10pt] %
+{\footnotesize \textcolor{black}{\underline{\hspace{7.5cm}}}} \\[-2pt] % 
+{\footnotesize \textcolor{black}{\textbf{Oficio N° \detokenize{{{CODIGO_BLINDADO}}}}}} 
+\end{flushright}
+
 
 \vspace{2.5cm}
 \noindent
 \hspace*{\dimexpr\textwidth+1cm\relax}
-\makebox[0pt][r]{\footnotesize\textbf{{{FECHA_GENERADO}} \hspace{0.5cm} {{{HORA_GENERADO}}}}}
+
 
 \begin{center}
     \textbf{\large SOLICITUD DE INGRESO PARA SER ACCIONISTA}
